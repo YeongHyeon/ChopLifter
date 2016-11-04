@@ -1,0 +1,193 @@
+package chopLifter;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Rectangle;
+
+public class Helicopter extends GameObj {
+	private Image[] img = new Image[2];
+	private int tmpW, p_counter, tilt_counter;
+	private double initY, landpoint, dy;
+	private boolean landing;
+	private double relX;
+
+	Helicopter(Image[] imgHelicopter, int w, int h) {
+		state = ST_ALIVE;
+		img = imgHelicopter;
+		tmpW = w;
+		height = h;
+
+		x = ChopLifter.FRAME_W - tmpW;
+		relX = x;
+		initY = ChopLifter.FRAME_H / 5 * 4 + 10;
+		y = initY;
+
+		landpoint = ChopLifter.FRAME_H / 5 * 4 - 100;
+		landing = true;
+		width = tmpW;
+		image = img[0];
+	}
+
+	// 폭발 상태 설정
+	void blast() {
+		state = ST_BLAST;
+		blast_count = 15;
+	}
+
+	private void setTilt() { // 기울임 설정 Method
+		if (tilt_counter < 15) {
+			tilt_counter++;
+		}
+	}
+
+	int getDegree() {
+		return degree;
+	}
+
+	void setFixX(double fixX, int dir) {
+		x = fixX;
+		if (dir < 0) {
+			relX -= 3;
+		} else if (dir > 0) {
+			relX += 3;
+		}
+	}
+
+	double getRelativeX() {
+		return relX;
+	}
+
+	// 왼쪽으로 이동
+	void moveLeft() {
+		directionX = GO_LEFT;
+
+		setTilt();
+		width = tmpW;
+
+		if (x >= tmpW) {
+			dx = degree;
+		}
+	}
+
+	// 오른쪽으로 이동
+	void moveRight() {
+		directionX = GO_RIGHT;
+
+		setTilt();
+		width = -tmpW;
+
+		if (x < ChopLifter.FRAME_W - tmpW) {
+			dx = degree;
+		}
+	}
+
+	// 위로 이동
+	void moveUp() {
+		directionY = GO_UP;
+		if (y >= height) {
+			y -= 3;
+		}
+	}
+
+	// 아래로 이동
+	void moveDown() {
+		directionY = GO_DOWN;
+		if (y < initY) {
+			y += 3;
+		}
+	}
+
+	// 착륙중인지 확인
+	boolean isLanding() {
+		return landing;
+	}
+
+	// 착륙했는지 확인
+	boolean isLanded() {
+		if (y >= initY) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	void move() {
+		p_counter++; // 프로펠러 회전용 변수
+		image = img[p_counter % 2];
+
+		if (directionX == GO_LEFT) {
+			degree = -tilt_counter;
+		} else if (directionX == GO_RIGHT) {
+			degree = tilt_counter;
+		}
+
+		if (tilt_counter > 0) { // 기울임
+			tilt_counter--;
+		}
+
+		if (y < initY) { // 헬기를 조종하지 않으면 점점 가라앉음
+			if (directionX == GO_NEUTRAL) {
+				y++;
+			}
+		}
+
+		if (dx < 0 && x + dx < tmpW) {
+			x = tmpW;
+		} else if (dx > 0 && x + dx > ChopLifter.FRAME_W - tmpW) {
+			x = ChopLifter.FRAME_W - tmpW;
+		} else {
+			x += dx;
+		}
+		x += dx;
+
+		if (relX >= ChopLifter.Left_End_X + tmpW || relX <= ChopLifter.Right_End_X - tmpW) {
+			relX += dx;
+		}
+
+		if (Math.abs(dx) > 1) {
+			dx = dx / 2;
+		} else {
+			dx = 0;
+			directionX = GO_NEUTRAL;
+		}
+
+		// 터졌을때
+		if (state == ST_BLAST) {
+			blast_count--;
+			if (blast_count == 0) {
+				state = ST_ALIVE;
+			}
+		} else if (state == ST_BLAST) {
+			blast_count--;
+		}
+
+		if (y >= landpoint && !isLanded() && directionY == GO_DOWN) {
+			landing = true;
+			directionY = GO_DOWN;
+			dy = Math.abs(initY - y) / 20;
+			if (dy < 0.1) {
+				dy = 0.05;
+			}
+			if (y < initY) {
+				y += dy;
+			}
+		} else {
+			directionY = GO_UP;
+			landing = false;
+		}
+	}
+
+	void draw(Graphics g) {
+		if (state == ST_ALIVE) {
+			// drawImage(g);
+			drawTiltImage(g);
+		} else if (state == ST_BLAST) {
+			if (blast_count % 2 == 0) {
+				drawTiltImage(g);
+			}
+			drawBlast(g);
+		}
+	}
+}

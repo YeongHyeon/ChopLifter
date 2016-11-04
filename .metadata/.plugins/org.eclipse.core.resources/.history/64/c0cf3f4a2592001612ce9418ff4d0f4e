@@ -1,0 +1,557 @@
+package chopLifter;
+
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import java.io.*;
+import javax.imageio.ImageIO;
+
+class Util {
+	static double rand(int max) {
+		return Math.random() * max;
+	}
+
+	static double rand(double min, double max) { // min~max범위에서 랜덤값 생성.
+		return min + (Math.random() * (max - min));
+	}
+
+	static boolean prob100(double r) { // 랜덤생성된 값이 r보다 작을경우 true.
+		return (Math.random() * 100) <= r;
+	}
+
+	static Color randColor() { // 0~255사이의 랜덤색 배정.
+		return randColor(0, 255);
+	}
+
+	static Color randColor(int min, int max) { // 지정된 범위 내의 랜덤색 배정.
+		int r = (int) rand(min, max);
+		int g = (int) rand(min, max);
+		int b = (int) rand(min, max);
+		return new Color(r, g, b);
+	}
+}
+
+class Star {
+	public static int MAX_STAR_SIZE = 10; // 별의 최대 크기
+
+	private Color color; // 별의 색상
+	private double x, y; // 별의 위치
+	private double size; // 별의 크기
+	int twinkle;
+
+	Star() {
+		init(); // init method invoke.
+	}
+
+	// 별의 색상, 위치 초기화
+	void init() {
+		color = Util.randColor(180, 256); // 어두운 색으로 랜덤 배정.
+		x = Util.rand(ChopLifter.FRAME_W - 1);
+		y = Util.rand(ChopLifter.FRAME_H - 1);
+		size = Util.rand(1, MAX_STAR_SIZE);
+	}
+
+	void twinkle() {
+		twinkle = 3;
+	}
+
+	// 타이머에 의한 별의 움직임 처리
+	void move() {
+	}
+
+	// 별 그리기
+	void draw(Graphics g) {
+		if (twinkle >= 0) { // 1%확률로 별이 깜빡임
+			twinkle--;
+			g.setColor(color);
+			g.fillOval((int) (x - size / 2), (int) (y - size / 2), (int) size, (int) size);
+		}
+	}
+}
+
+class Cloud {
+
+	private double x, y;
+	private double dx, width, height;
+	private Image img;
+
+	Cloud(Image img) {
+		this.img = img;
+		init();
+	}
+
+	void init() {
+		x = Util.rand(ChopLifter.FRAME_W - 1);
+		y = Util.rand(-40, ChopLifter.FRAME_H / 5 * 4);
+		width = Util.rand(100, 300);
+		height = width / 2;
+		dx = width / 300;
+	}
+
+	void move() {
+		x += dx;
+		if (x > ChopLifter.FRAME_W + 100) {
+			init();
+			x = -Util.rand(ChopLifter.FRAME_W / 10);
+		}
+	}
+
+	void draw(Graphics g) {
+		g.drawImage(img, (int) (x - width / 2), (int) (y - height / 2), (int) width, (int) height, null);
+	}
+}
+
+abstract class GameObj {
+	public static int ST_DEATH = 0;
+	public static int ST_ALIVE = 1;
+	public static int ST_BLAST = 2;
+
+	public static int GO_RIGHT = 3;
+	public static int GO_LEFT = 4;
+	public static int GO_UP = 5;
+	public static int GO_DOWN = 6;
+
+	Image image; // 게임 객체 이미지
+	int state; // 게임 객체 상태
+	double x, y; // 게임 객체 위치
+	int width, height; // 게임 객체 크기
+	int blast_count; // 폭발 카운트
+
+	int directionX; // 방향을 나타낼 변수.
+	int directionY; // 방향을 나타낼 변수.
+
+	double initX;
+
+	int getState() {
+		return state;
+	} // 상태 확인
+
+	double getX() {
+		return x;
+	} // 가로 위치 확인
+
+	double getY() {
+		return y;
+	} // 세로 위치 확인
+
+	double getLeftX() {
+		return x - width;
+	}
+
+	double getLeftY() {
+		return y - height;
+	}
+
+	// 이미지 출력
+	void drawImage(Graphics g) {
+		g.drawImage(image, (int) (x - width / 2), (int) (y - height / 2), width, height, null);
+	}
+
+	// 폭발 이미지 출력
+	void drawBlast(Graphics g) {
+		// blast_count 개수 만큼 연기 그리기
+		for (int i = 1; i < blast_count; i++) {
+			g.setColor(Util.randColor(128, 255));
+			double x0 = Util.rand(-30, 30);
+			double y0 = Util.rand(-30, 30);
+			double r0 = Util.rand(5, 30);
+			g.fillOval((int) (x - x0 - r0 / 2), (int) (y - y0 - r0 / 2), (int) r0, (int) r0);
+		}
+	}
+
+	// 바운딩박스 생성
+	Rectangle getBBox() {
+		return new Rectangle((int) (x - width / 2), (int) (y - height / 2), width, height);
+	}
+
+	// 추상 메소드
+	abstract void blast();
+
+	abstract void move();
+
+	abstract void draw(Graphics g);
+}
+
+class Plane extends GameObj {
+	private Image[] imgL = new Image[2];
+	private Image[] imgR = new Image[2];
+	private int l_counter, r_counter;
+	private double initY, landpoint, dy;
+	private boolean landing;
+
+	// 생성자
+	Plane(Image L[], Image R[], int w, int h) {
+		state = ST_ALIVE;
+		imgL = L;
+		imgR = R;
+		width = w;
+		height = h;
+		initY = ChopLifter.FRAME_H / 5 * 4 + 10;
+		landpoint = ChopLifter.FRAME_H / 5 * 4 - (height);
+		x = ChopLifter.FRAME_W - (width / 3 * 2);
+		y = initY;
+		landing = true;
+		directionX = GO_LEFT;
+	}
+
+	// 폭발 상태 설정
+	void blast() {
+		state = ST_BLAST;
+		blast_count = 30;
+	}
+
+	// 왼쪽으로 이동
+	void moveLeft() {
+		directionX = GO_LEFT;
+		if (x >= width / 3 * 2) {
+			x -= 10;
+		}
+	}
+
+	// 오른쪽으로 이동
+	void moveRight() {
+		directionX = GO_RIGHT;
+		if (x < ChopLifter.FRAME_W - (width / 3 * 2)) {
+			x += 10;
+		}
+	}
+
+	void moveUp() {
+		directionY = GO_UP;
+		if (y >= height / 3 * 2) {
+			y -= 5;
+		}
+	}
+
+	void moveDown() {
+		directionY = GO_DOWN;
+		if (y < initY) {
+			y += 5;
+		}
+	}
+
+	boolean isLanding() {
+		return landing;
+	}
+
+	boolean isLanded() {
+		if (y >= initY) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	void move() {
+		l_counter++;
+		r_counter++;
+		if (state == ST_BLAST) {
+			blast_count--;
+			if (blast_count == 0) {
+				state = ST_ALIVE;
+			}
+		}
+		if (y >= landpoint && !isLanded() && directionY == GO_DOWN) {
+			landing = true;
+			dy = Math.abs(initY - y) / 10;
+			if (dy < 0.1) {
+				dy = 0.1;
+			}
+			y += dy;
+		} else {
+			landing = false;
+		}
+	}
+
+	void draw(Graphics g) {
+		if (state == ST_ALIVE) {
+			if (directionX == GO_LEFT) {
+				g.drawImage(imgL[l_counter % 2], (int) (x - width / 2), (int) (y - height / 2), width, height, null);
+			} else if (directionX == GO_RIGHT) {
+				g.drawImage(imgR[r_counter % 2], (int) (x - width / 2), (int) (y - height / 2), width, height, null);
+			}
+		} else if (state == ST_BLAST) {
+			if (blast_count % 2 == 0) {
+				drawImage(g);
+			}
+			drawBlast(g);
+		}
+	}
+}
+
+class EnemyPlane extends GameObj {
+	private double dx; // 단위 이동 거리
+
+	EnemyPlane(Image img, int w, int h) {
+		image = img;
+		state = ST_DEATH; // 처음 만들 때 Death상태로 생성함.
+		width = w;
+		height = h;
+	}
+
+	void birth() { // 이동방향, 이동속도, 출발높이, 전환지점을 지정함.
+		state = ST_ALIVE;
+		x = -40;
+		dx = Util.rand(3, 6);
+		y = Util.rand(40, ChopLifter.FRAME_H / 5 * 3);
+	}
+
+	// 폭발 상태 설정
+	void blast() {
+		state = ST_BLAST;
+		blast_count = 15;
+	}
+
+	void move() {
+		// ALIVE 상태에서는 좌우로 이동
+		if (state == ST_ALIVE) {
+			x += dx;
+
+			if (x < -40 || ChopLifter.FRAME_W + 40 < x) {
+				state = ST_DEATH;
+			}
+		}
+		// BLAST 상태에서는 count 시간 후 DEATH로 설정
+		else if (state == ST_BLAST) {
+			blast_count--;
+			if (blast_count == 0) {
+				state = ST_DEATH;
+			}
+		}
+	}
+
+	void draw(Graphics g) {
+		if (state == ST_ALIVE) {
+			drawImage(g);
+		} else if (state == ST_BLAST) {
+			drawBlast(g);
+		}
+	}
+}
+
+class Person extends GameObj {
+	private Image[] imgP = new Image[2];
+	private int p_counter, pointer;
+	private double dx;
+
+	Person(Image img[], int w, int h) {
+		imgP = img;
+		state = ST_DEATH; // 처음 만들 때 Death상태로 생성함.
+		width = w;
+		height = h;
+	}
+
+	void birth() { // 이동방향, 이동속도, 출발높이, 전환지점을 지정함.
+		state = ST_ALIVE;
+		initX = Util.rand(20, ChopLifter.FRAME_W - 20);
+		x = Util.rand(20, ChopLifter.FRAME_W - 20);
+		dx = Util.rand(1, 3);
+		y = ChopLifter.FRAME_H + 30;
+		if (Util.prob100(50)) {
+			dx *= -1;
+		}
+	}
+
+	// 폭발 상태 설정
+	void blast() {
+		state = ST_BLAST;
+		blast_count = 15;
+	}
+
+	void move() {
+		p_counter++;
+		if (p_counter % 10 == 0) {
+			pointer++;
+		}
+		// ALIVE 상태에서는 좌우로 이동
+		if (state == ST_ALIVE) {
+			if (y >= ChopLifter.FRAME_H - 90) {
+				y -= 2;
+			} else {
+				if (Util.prob100(10)) {
+					dx *= -1;
+				}
+				x += dx;
+			}
+
+			if (x < -40 || ChopLifter.FRAME_W + 40 < x) {
+				state = ST_DEATH;
+			}
+		}
+		// BLAST 상태에서는 count 시간 후 DEATH로 설정
+		else if (state == ST_BLAST) {
+			blast_count--;
+			if (blast_count == 0) {
+				state = ST_DEATH;
+			}
+		}
+	}
+
+	void draw(Graphics g) {
+		if (state == ST_ALIVE) {
+			g.drawImage(imgP[pointer % 2], (int) (x - width / 2), (int) (y - height / 2), width, height, null);
+		} else if (state == ST_BLAST) {
+			drawBlast(g);
+		}
+	}
+}
+
+@SuppressWarnings("serial")
+class ChopLifterComponent extends JComponent {
+	public static int TIME_SLICE = 50;
+	public static int MAX_STAR = 100;
+	public static int MAX_CLOUD = 10;
+	public static int MAX_ENEMY_PLANE = 3;
+	public static int MAX_PERSON = 10;
+
+	private Timer t;
+	private Star[] star;
+	private Cloud[] cloud;
+	private Plane plane;
+	private EnemyPlane[] enemyPlane = new EnemyPlane[MAX_ENEMY_PLANE];
+	private Person[] person = new Person[MAX_PERSON];
+
+	Image imgCloud, imgEnemyPlane;
+	Image[] planeL = new Image[2];
+	Image[] planeR = new Image[2];
+	Image[] imgPerson = new Image[2];
+
+	ChopLifterComponent() {
+
+		star = new Star[MAX_STAR];
+		cloud = new Cloud[MAX_CLOUD];
+		// 이미지 읽기
+		try {
+			imgCloud = ImageIO.read(new File("images/cloud.png"));
+			planeL[0] = ImageIO.read(new File("images/planeLeft_1.png"));
+			planeL[1] = ImageIO.read(new File("images/planeLeft_2.png"));
+			planeR[0] = ImageIO.read(new File("images/planeRight_1.png"));
+			planeR[1] = ImageIO.read(new File("images/planeRight_2.png"));
+			imgPerson[0] = ImageIO.read(new File("images/person1.png"));
+			imgPerson[1] = ImageIO.read(new File("images/person2.png"));
+			imgEnemyPlane = ImageIO.read(new File("images/enemyPlane.png"));
+			System.out.println("ImageRead");
+		} catch (IOException e) {
+			System.out.println("IOException Exit Program");
+			System.exit(-1);
+		}
+
+		plane = new Plane(planeL, planeR, 120, 70);
+		for (int i = 0; i < MAX_STAR; i++) {
+			star[i] = new Star();
+		}
+		for (int i = 0; i < MAX_CLOUD; i++) {
+			cloud[i] = new Cloud(imgCloud);
+		}
+		for (int i = 0; i < MAX_ENEMY_PLANE; i++) {
+			enemyPlane[i] = new EnemyPlane(imgEnemyPlane, 80, 40);
+		}
+		for (int i = 0; i < MAX_PERSON; i++) {
+			person[i] = new Person(imgPerson, 30, 40);
+		}
+		// 키 이벤트 등록
+		this.addKeyListener(new KeyHandler());
+		this.setFocusable(true);
+		// 타이머 등록
+		t = new Timer(TIME_SLICE, new TimerHandler());
+		t.start();
+		System.out.println("Timer Start");
+
+		this.addKeyListener(new KeyHandler());
+		this.requestFocus();
+		System.out.println("KeyHandler Run");
+	}
+
+	class TimerHandler implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			plane.move();
+			for (Star s : star) {
+				if (Util.prob100(5) && s.twinkle <= 0) {
+					s.twinkle();
+				}
+			}
+			for (Cloud c : cloud) {
+				c.move();
+			}
+			for (EnemyPlane ep : enemyPlane) {
+				if (ep.getState() == EnemyPlane.ST_DEATH && Util.prob100(10)) {
+					ep.birth();
+				}
+				ep.move();
+			}
+			for (Person p : person) {
+				if (p.getState() == Person.ST_DEATH && Util.prob100(10)) {
+					p.birth();
+				}
+				p.move();
+			}
+			// 전체 다시 그리기
+			repaint();
+		}
+	}
+
+	class KeyHandler extends KeyAdapter {
+		public void keyPressed(KeyEvent e) {
+			int code = e.getKeyCode();
+
+			// 키 입력 처리 - - -
+			if (code == KeyEvent.VK_UP && !plane.isLanding()) {
+				plane.moveUp();
+				// System.out.println("UP");
+			} else if (code == KeyEvent.VK_DOWN && !plane.isLanding()) {
+				plane.moveDown();
+				// System.out.println("DOWN");
+			} else if (code == KeyEvent.VK_LEFT && !plane.isLanded()) {
+				plane.moveLeft();
+				// System.out.println("LEFT");
+			} else if (code == KeyEvent.VK_RIGHT && !plane.isLanded()) {
+				plane.moveRight();
+				// System.out.println("RIGHT");
+			}
+			// 전체 다시 그리기
+			repaint();
+		}
+	}
+
+	public void paintComponent(Graphics g) {
+		// 하늘
+		g.setColor(new Color(52, 8, 136));
+		g.fillRect(0, 0, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
+		// 별, 구름
+		for (Star s : star) {
+			s.draw(g); // 움직이는 별 그리기
+		}
+		for (Cloud c : cloud) {
+			c.draw(g);
+		}
+		// 땅
+		g.setColor(new Color(0, 166, 80));
+		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
+
+		for (EnemyPlane ep : enemyPlane) {
+			ep.draw(g);
+		}
+
+		plane.draw(g);
+
+		for (Person p : person) {
+			p.draw(g);
+		}
+	}
+}
+
+public class ChopLifter {
+	public static int FRAME_W = 1200;
+	public static int FRAME_H = 600;
+
+	public static void main(String[] arg) {
+		System.out.println("Start Program");
+		JFrame f = new JFrame("ChopLifter");
+		f.setSize(FRAME_W + 16, FRAME_H + 34);
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		ChopLifterComponent sc = new ChopLifterComponent();
+		f.add(sc);
+		f.setVisible(true);
+	}
+}

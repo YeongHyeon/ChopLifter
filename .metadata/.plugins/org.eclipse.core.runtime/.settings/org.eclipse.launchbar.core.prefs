@@ -1,0 +1,4 @@
+configDescList=org.eclipse.launchbar.core.descriptorType.default\:ChopLifter
+eclipse.preferences.version=1
+org.eclipse.launchbar.core.descriptorType.default\:ChopLifter/activeLaunchMode=run
+org.eclipse.launchbar.core.descriptorType.default\:ChopLifter/activeLaunchTarget=org.eclipse.remote.LocalServices\:Local
