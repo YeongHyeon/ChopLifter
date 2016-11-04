@@ -28,7 +28,7 @@ class ChopLifterComponent extends JComponent {
 
 	ChopLifterComponent() {
 
-		// ÀÌ¹ÌÁö ÀĞ±â
+		// ì´ë¯¸ì§€ ì½ê¸°
 		try {
 			imgCloud = ImageIO.read(new File("images/cloud.png"));
 			imgMountain = ImageIO.read(new File("images/mountain.png"));
@@ -44,7 +44,7 @@ class ChopLifterComponent extends JComponent {
 			System.exit(-1);
 		}
 
-		// °´Ã¼ ÃÊ±âÈ­
+		// ê°ì²´ ì´ˆê¸°í™”
 		heli = new Helicopter(imgHelicopter, 120, 70);
 		for (int i = 0; i < MAX_CLOUD; i++) {
 			cloud[i] = new Cloud(imgCloud);
@@ -61,10 +61,10 @@ class ChopLifterComponent extends JComponent {
 		missile = new Missile(imgMissile, 30, 15);
 		bomb = new Bomb(imgPlaneBomb, 30, 30);
 
-		// Å° ÀÌº¥Æ® µî·Ï
+		// í‚¤ ì´ë²¤íŠ¸ ë“±ë¡
 		this.addKeyListener(new KeyHandler());
 		this.setFocusable(true);
-		// Å¸ÀÌ¸Ó µî·Ï
+		// íƒ€ì´ë¨¸ ë“±ë¡
 		t = new Timer(TIME_SLICE, new TimerHandler());
 		t.start();
 		System.out.println("Timer Start");
@@ -110,14 +110,14 @@ class ChopLifterComponent extends JComponent {
 						if (ep.getBBox().intersects(missile.getBBox())) {
 							ep.blast();
 							missile.blast();
-							break; // ÇÏ³ª ÅÍÁö¸é Å»Ãâ
+							break; // í•˜ë‚˜ í„°ì§€ë©´ íƒˆì¶œ
 						}
 					}
 				}
 			}
 
 			bomb.move();
-			// ÆøÅº Ãæµ¹Ã³¸®
+			// í­íƒ„ ì¶©ëŒì²˜ë¦¬
 			if (bomb.getState() == Bomb.ST_ALIVE) {
 				if (heli.getState() == Helicopter.ST_ALIVE) {
 					if (heli.getBBox().intersects(bomb.getBBox())) {
@@ -129,7 +129,7 @@ class ChopLifterComponent extends JComponent {
 
 			shiftBackGround();
 
-			// ÀüÃ¼ ´Ù½Ã ±×¸®±â
+			// ì „ì²´ ë‹¤ì‹œ ê·¸ë¦¬ê¸°
 			repaint();
 		}
 	}
@@ -144,7 +144,7 @@ class ChopLifterComponent extends JComponent {
 					// NOP
 				} else {
 					for (Mountain m : mountain) {
-						m.setShift(heli.getDegree()); // »êÀÌ ¿òÁ÷ÀÌ´Â ¼Óµµ´Â ³ªÁß¿¡ ´õ ´À¸®°Ô ¼öÁ¤
+						m.setShift(heli.getDegree()); // ì‚°ì´ ì›€ì§ì´ëŠ” ì†ë„ëŠ” ë‚˜ì¤‘ì— ë” ëŠë¦¬ê²Œ ìˆ˜ì •
 					}
 					for (EnemyPlane ep : enemyPlane) {
 						ep.setShift(heli.getDegree()); 
@@ -177,7 +177,7 @@ class ChopLifterComponent extends JComponent {
 		public void keyPressed(KeyEvent e) {
 			int code = e.getKeyCode();
 
-			// Å° ÀÔ·Â Ã³¸® - - -
+			// í‚¤ ì…ë ¥ ì²˜ë¦¬ - - -
 			if (code == KeyEvent.VK_UP) {
 				heli.moveUp();
 				// System.out.println("UP");
@@ -203,25 +203,25 @@ class ChopLifterComponent extends JComponent {
 			} else if (e.getKeyChar() == 'x' && !heli.isLanded()) {
 				missile.shot(heli.getX(), heli.getY(), heli.directionX, 1, heli.getDegree());
 			}
-			// ÀüÃ¼ ´Ù½Ã ±×¸®±â
+			// ì „ì²´ ë‹¤ì‹œ ê·¸ë¦¬ê¸°
 			repaint();
 		}
 
 	}
 
 	public void paintComponent(Graphics g) {
-		// ÇÏ´Ã
+		// í•˜ëŠ˜
 		g.setColor(new Color(0, 188, 255));
 		g.fillRect(0, 0, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
-		// ±¸¸§
+		// êµ¬ë¦„
 		for (Cloud c : cloud) {
 			c.draw(g);
 		}
-		// »ê
+		// ì‚°
 		for (Mountain m : mountain) {
 			m.draw(g);
 		}
-		// ¶¥
+		// ë•…
 		g.setColor(new Color(255, 255, 81));
 		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
 		g.setColor(new Color(255, 220, 81));
