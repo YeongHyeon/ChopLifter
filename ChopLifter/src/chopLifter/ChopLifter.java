@@ -249,7 +249,7 @@ public class ChopLifter {
 
 	public static void main(String[] arg) {
 		System.out.println("Start Program");
-		JFrame f = new JFrame("ChopLifter_박영현,정도환");
+		JFrame f = new JFrame("ChopLifter");
 		f.setSize(FRAME_W + 16, FRAME_H + 34);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 

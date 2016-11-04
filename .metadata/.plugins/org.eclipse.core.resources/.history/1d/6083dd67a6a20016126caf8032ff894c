@@ -10,7 +10,7 @@ import javax.imageio.ImageIO;
 class ChopLifterComponent extends JComponent {
 	public static int TIME_SLICE = 50;
 	public static int MAX_CLOUD = 10;
-	public static int MAX_MOUNTAIN = 10;
+	public static int MAX_MOUNTAIN = 30;
 	public static int MAX_ENEMY_PLANE = 3;
 	public static int MAX_PERSON = 10;
 	public static int MAX_TURRET = 5;
@@ -49,11 +49,11 @@ class ChopLifterComponent extends JComponent {
 		for (int i = 0; i < MAX_CLOUD; i++) {
 			cloud[i] = new Cloud(imgCloud);
 		}
-		
-		double mx = -ChopLifter.FRAME_W;
+
+		double mx = ChopLifter.Left_End_X;
 		for (int i = 0; i < MAX_MOUNTAIN; i++) {
 			mountain[i] = new Mountain(imgMountain, mx);
-			mx += Util.rand(50, 300);
+			mx += Util.rand(50, ChopLifter.FRAME_W / 3);
 		}
 		for (int i = 0; i < MAX_ENEMY_PLANE; i++) {
 			enemyPlane[i] = new EnemyPlane(imgEnemyPlane, 80, 40);
@@ -77,19 +77,19 @@ class ChopLifterComponent extends JComponent {
 	class TimerHandler implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
 			heli.move();
-			
+
 			for (Cloud c : cloud) {
 				c.move();
 			}
 			for (Mountain m : mountain) {
 				m.move();
 			}
-			
+
 			for (EnemyPlane ep : enemyPlane) {
 				if (ep.getState() == EnemyPlane.ST_DEATH && Util.prob100(10)) {
 					ep.birth(heli.getX());
 				}
-				if (ep.getState() == EnemyPlane.ST_ALIVE && Util.prob100(1) && !heli.isLanded()) {
+				if (ep.getState() == EnemyPlane.ST_ALIVE && Util.prob100(1) && !heli.isLanded() && !heli.isLanding()) {
 					// bomb.shot(ep.getX(), ep.getY(), heli.getX(),
 					// heli.getY());
 				}
@@ -127,8 +127,49 @@ class ChopLifterComponent extends JComponent {
 				}
 			}
 
+			shiftBackGround();
+
 			// 전체 다시 그리기
 			repaint();
+		}
+	}
+
+	void shiftBackGround() {
+		double absX = heli.getAbsoluteX();
+		if (heli.directionX == Helicopter.GO_LEFT) {
+			if (absX >= (ChopLifter.Right_End_X - ChopLifter.FRAME_W / 2)) {
+				// NOP
+			} else {
+				if (absX <= (ChopLifter.Left_End_X + ChopLifter.FRAME_W / 2)) {
+					// NOP
+				} else {
+					for (Mountain m : mountain) {
+						m.setShift(heli.getDegree()); // 산이 움직이는 속도는 나중에 더 느리게 수정
+					}
+					for (EnemyPlane ep : enemyPlane) {
+						ep.setShift(heli.getDegree()); 
+					}
+				}
+			}
+		} else if (heli.directionX == Helicopter.GO_RIGHT) {
+			if (absX <= (ChopLifter.Left_End_X + ChopLifter.FRAME_W / 2)) {
+				// NOP
+			} else {
+				if (absX >= (ChopLifter.Right_End_X - ChopLifter.FRAME_W / 2)) {
+					// NOP
+				} else {
+					for (Mountain m : mountain) {
+						m.setShift(heli.getDegree());
+					}
+					for (EnemyPlane ep : enemyPlane) {
+						ep.setShift(heli.getDegree()); 
+					}
+				}
+			}
+		}
+		if (absX > (ChopLifter.Left_End_X + ChopLifter.FRAME_W / 2)
+				&& absX < (ChopLifter.Right_End_X - ChopLifter.FRAME_W / 2)) {
+			heli.setFixX();
 		}
 	}
 
@@ -143,27 +184,34 @@ class ChopLifterComponent extends JComponent {
 			} else if (code == KeyEvent.VK_DOWN && !heli.isLanding()) {
 				heli.moveDown();
 				// System.out.println("DOWN");
-			} else if (code == KeyEvent.VK_LEFT && !heli.isLanding() && !heli.isLanded() && heli.getTilt() <= 0) {
-				heli.moveLeft();
-				missile.setInertia();
-				// System.out.println("LEFT");
-			} else if (code == KeyEvent.VK_RIGHT && !heli.isLanding() && !heli.isLanded() && heli.getTilt() >= 0) {
-				heli.moveRight();
-				missile.setInertia();
-				// System.out.println("RIGHT");
+			} else if (code == KeyEvent.VK_LEFT && !heli.isLanded()) {
+				if (heli.getDegree() <= 0 && heli.getAbsoluteX() > ChopLifter.Left_End_X + 120) {
+					heli.moveLeft();
+					missile.setInertia();
+					// shiftBackGround();
+					// System.out.println("LEFT");
+				}
+			} else if (code == KeyEvent.VK_RIGHT && !heli.isLanded()) {
+				if (heli.getDegree() >= 0 && heli.getAbsoluteX() < ChopLifter.Right_End_X - 120) {
+					heli.moveRight();
+					missile.setInertia();
+					// shiftBackGround();
+					// System.out.println("RIGHT");
+				}
 			} else if (e.getKeyChar() == 'z') {
-				missile.shot(heli.getX(), heli.getY(), heli.directionX, 0, heli.getTilt());
+				missile.shot(heli.getX(), heli.getY(), heli.directionX, 0, heli.getDegree());
 			} else if (e.getKeyChar() == 'x' && !heli.isLanded()) {
-				missile.shot(heli.getX(), heli.getY(), heli.directionX, 1, heli.getTilt());
+				missile.shot(heli.getX(), heli.getY(), heli.directionX, 1, heli.getDegree());
 			}
 			// 전체 다시 그리기
 			repaint();
 		}
+
 	}
 
 	public void paintComponent(Graphics g) {
 		// 하늘
-		g.setColor(new Color(52, 8, 136));
+		g.setColor(new Color(0, 188, 255));
 		g.fillRect(0, 0, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
 		// 구름
 		for (Cloud c : cloud) {
@@ -174,8 +222,14 @@ class ChopLifterComponent extends JComponent {
 			m.draw(g);
 		}
 		// 땅
-		g.setColor(new Color(0, 166, 80));
+		g.setColor(new Color(255, 255, 81));
 		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
+		g.setColor(new Color(255, 220, 81));
+		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4 + 10, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
+		g.setColor(new Color(255, 200, 81));
+		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4 + 30, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
+		g.setColor(new Color(255, 188, 81));
+		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4 + 60, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
 
 		bomb.draw(g);
 		for (EnemyPlane ep : enemyPlane) {
@@ -190,8 +244,8 @@ class ChopLifterComponent extends JComponent {
 public class ChopLifter {
 	public static int FRAME_W = 1000;
 	public static int FRAME_H = 562;
-	public static int stdX = 0;
-	public static int stdY = 0;
+	public static int Left_End_X = -2000;
+	public static int Right_End_X = 1000;
 
 	public static void main(String[] arg) {
 		System.out.println("Start Program");

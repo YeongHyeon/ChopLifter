@@ -2,9 +2,7 @@ package chopLifter;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Rectangle;
 
 public class Helicopter extends GameObj {
 	private Image[] img = new Image[2];
