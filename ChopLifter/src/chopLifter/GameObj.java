@@ -28,6 +28,7 @@ abstract public class GameObj extends JPanel {
 
 	int directionX; // 방향을 나타낼 변수.
 	int directionY; // 방향을 나타낼 변수.
+	Graphics2D g2d;
 
 	int getState() {
 		return state;
@@ -72,7 +73,7 @@ abstract public class GameObj extends JPanel {
 	}
 
 	void drawTiltImage(Graphics g) {
-		Graphics2D g2d = (Graphics2D) g;
+		g2d = (Graphics2D) g;
 		g2d.rotate(Math.toRadians(degree), (x - width / 2) + width / 2, (y - height / 2) + height / 2);
 		g2d.drawImage(image, (int) (x - width / 2), (int) (y - height / 2), width, height, this);
 	}

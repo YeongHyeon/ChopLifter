@@ -37,7 +37,7 @@ public class Helicopter extends GameObj {
 		blast_count = 15;
 	}
 
-	private void setTilt() { // 기울임 설정 Method
+	private void setDegree() { // 기울임 설정 Method
 		if (tilt_counter < 15) {
 			tilt_counter++;
 		}
@@ -59,7 +59,7 @@ public class Helicopter extends GameObj {
 	void moveLeft() {
 		directionX = GO_LEFT;
 
-		setTilt();
+		setDegree();
 		width = tmpW;
 
 		if (x >= tmpW) {
@@ -71,7 +71,7 @@ public class Helicopter extends GameObj {
 	void moveRight() {
 		directionX = GO_RIGHT;
 
-		setTilt();
+		setDegree();
 		width = -tmpW;
 
 		if (x < ChopLifter.FRAME_W - tmpW) {

@@ -13,7 +13,7 @@ class ChopLifterComponent extends JComponent {
 	public static int MAX_MOUNTAIN = 30;
 	public static int MAX_ENEMY_PLANE = 3;
 	public static int MAX_PERSON = 10;
-	public static int MAX_TURRET = 5;
+	public static int MAX_TURRET = 50;
 
 	private Timer t;
 	private Cloud[] cloud = new Cloud[MAX_CLOUD];
@@ -22,49 +22,60 @@ class ChopLifterComponent extends JComponent {
 	private EnemyPlane[] enemyPlane = new EnemyPlane[MAX_ENEMY_PLANE];
 	private Missile missile;
 	private Bomb bomb;
-	Image imgCloud, imgMountain, imgEnemyPlane, imgPlaneBomb;
+	private Turret[] turr = new Turret[MAX_TURRET];
+	Image imgCloud, imgMountain, imgPlaneBomb;
 	Image[] imgHelicopter = new Image[2];
+	Image[] imgEnemyPlane = new Image[2];
 	Image[] imgMissile = new Image[2];
+	Image[] imgTurret = new Image[2];
 
 	ChopLifterComponent() {
 
-		// 이미지 읽기
+		// �씠誘몄� �씫湲�
 		try {
 			imgCloud = ImageIO.read(new File("images/cloud.png"));
 			imgMountain = ImageIO.read(new File("images/mountain.png"));
-			imgHelicopter[0] = ImageIO.read(new File("images/ahpach1.png"));
-			imgHelicopter[1] = ImageIO.read(new File("images/ahpach2.png"));
-			imgEnemyPlane = ImageIO.read(new File("images/enemyPlane.png"));
+			imgHelicopter[0] = ImageIO.read(new File("images/helicopter1.png"));
+			imgHelicopter[1] = ImageIO.read(new File("images/helicopter2.png"));
+			imgEnemyPlane[0] = ImageIO.read(new File("images/enemyPlane1.png"));
+			imgEnemyPlane[1] = ImageIO.read(new File("images/enemyPlane2.png"));
 			imgMissile[0] = ImageIO.read(new File("images/missile1.png"));
 			imgMissile[1] = ImageIO.read(new File("images/missile2.png"));
 			imgPlaneBomb = ImageIO.read(new File("images/bomb.png"));
+			imgTurret[0] = ImageIO.read(new File("images/TurretRight.png"));
+			imgTurret[1] = ImageIO.read(new File("images/TurretLeft.png"));
 			System.out.println("ImageRead");
 		} catch (IOException e) {
 			System.out.println("IOException Exit Program");
 			System.exit(-1);
 		}
 
-		// 객체 초기화
-		heli = new Helicopter(imgHelicopter, 120, 70);
+		// 媛앹껜 珥덇린�솕
+		heli = new Helicopter(imgHelicopter, 130, 50);
 		for (int i = 0; i < MAX_CLOUD; i++) {
 			cloud[i] = new Cloud(imgCloud);
 		}
 
-		double mx = ChopLifter.Left_End_X;
+		double mx = ChopLifter.Right_End_X;
 		for (int i = 0; i < MAX_MOUNTAIN; i++) {
 			mountain[i] = new Mountain(imgMountain, mx);
-			mx += Util.rand(50, ChopLifter.FRAME_W / 3);
+			mx -= Util.rand(50, ChopLifter.FRAME_W / 3);
 		}
 		for (int i = 0; i < MAX_ENEMY_PLANE; i++) {
-			enemyPlane[i] = new EnemyPlane(imgEnemyPlane, 80, 40);
+			enemyPlane[i] = new EnemyPlane(imgEnemyPlane, 110, 50);
 		}
 		missile = new Missile(imgMissile, 30, 15);
 		bomb = new Bomb(imgPlaneBomb, 30, 30);
+		double tx = ChopLifter.Left_End_X;
+		for (int i = 0; i < MAX_TURRET; i++) {
+			turr[i] = new Turret(imgTurret, tx, 30, 76);
+			tx += Util.rand(100, ChopLifter.FRAME_W / 3);
+		}
 
-		// 키 이벤트 등록
+		// �궎 �씠踰ㅽ듃 �벑濡�
 		this.addKeyListener(new KeyHandler());
 		this.setFocusable(true);
-		// 타이머 등록
+		// ���씠癒� �벑濡�
 		t = new Timer(TIME_SLICE, new TimerHandler());
 		t.start();
 		System.out.println("Timer Start");
@@ -110,14 +121,14 @@ class ChopLifterComponent extends JComponent {
 						if (ep.getBBox().intersects(missile.getBBox())) {
 							ep.blast();
 							missile.blast();
-							break; // 하나 터지면 탈출
+							break; // �븯�굹 �꽣吏�硫� �깉異�
 						}
 					}
 				}
 			}
 
 			bomb.move();
-			// 폭탄 충돌처리
+			// �룺�깂 異⑸룎泥섎━
 			if (bomb.getState() == Bomb.ST_ALIVE) {
 				if (heli.getState() == Helicopter.ST_ALIVE) {
 					if (heli.getBBox().intersects(bomb.getBBox())) {
@@ -127,9 +138,13 @@ class ChopLifterComponent extends JComponent {
 				}
 			}
 
+			for (int i = 0; i < MAX_TURRET; i++) {
+				turr[i].setPosin(heli.getX());
+			}
+
 			shiftBackGround();
 
-			// 전체 다시 그리기
+			// �쟾泥� �떎�떆 洹몃━湲�
 			repaint();
 		}
 	}
@@ -144,10 +159,15 @@ class ChopLifterComponent extends JComponent {
 					// NOP
 				} else {
 					for (Mountain m : mountain) {
-						m.setShift(heli.getDegree()); // 산이 움직이는 속도는 나중에 더 느리게 수정
+						m.setShift(heli.getDegree() / 5 * 3); // �궛�씠 ��吏곸씠�뒗
+																// �냽�룄�뒗 �굹以묒뿉
+																// �뜑 �뒓由ш쾶 �닔�\
 					}
 					for (EnemyPlane ep : enemyPlane) {
-						ep.setShift(heli.getDegree()); 
+						ep.setShift(heli.getDegree());
+					}
+					for (Turret t : turr) {
+						t.setShift(heli.getDegree());
 					}
 				}
 			}
@@ -159,10 +179,13 @@ class ChopLifterComponent extends JComponent {
 					// NOP
 				} else {
 					for (Mountain m : mountain) {
-						m.setShift(heli.getDegree());
+						m.setShift(heli.getDegree() / 5 * 3);
 					}
 					for (EnemyPlane ep : enemyPlane) {
-						ep.setShift(heli.getDegree()); 
+						ep.setShift(heli.getDegree());
+					}
+					for (Turret t : turr) {
+						t.setShift(heli.getDegree());
 					}
 				}
 			}
@@ -177,7 +200,7 @@ class ChopLifterComponent extends JComponent {
 		public void keyPressed(KeyEvent e) {
 			int code = e.getKeyCode();
 
-			// 키 입력 처리 - - -
+			// �궎 �엯�젰 泥섎━ - - -
 			if (code == KeyEvent.VK_UP) {
 				heli.moveUp();
 				// System.out.println("UP");
@@ -203,25 +226,31 @@ class ChopLifterComponent extends JComponent {
 			} else if (e.getKeyChar() == 'x' && !heli.isLanded()) {
 				missile.shot(heli.getX(), heli.getY(), heli.directionX, 1, heli.getDegree());
 			}
-			// 전체 다시 그리기
+			// �쟾泥� �떎�떆 洹몃━湲�
 			repaint();
 		}
 
 	}
 
 	public void paintComponent(Graphics g) {
-		// 하늘
+		// �븯�뒛
 		g.setColor(new Color(0, 188, 255));
 		g.fillRect(0, 0, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
-		// 구름
+		g.setColor(new Color(0, 188, 240));
+		g.fillRect(0, 100, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
+		g.setColor(new Color(0, 188, 225));
+		g.fillRect(0, 200, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
+		g.setColor(new Color(0, 188, 210));
+		g.fillRect(0, 300, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
+		// 援щ쫫
 		for (Cloud c : cloud) {
 			c.draw(g);
 		}
-		// 산
+		// �궛
 		for (Mountain m : mountain) {
 			m.draw(g);
 		}
-		// 땅
+		// �븙
 		g.setColor(new Color(255, 255, 81));
 		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
 		g.setColor(new Color(255, 220, 81));
@@ -235,6 +264,11 @@ class ChopLifterComponent extends JComponent {
 		for (EnemyPlane ep : enemyPlane) {
 			ep.draw(g);
 		}
+
+		for (Turret t : turr) {
+			t.draw(g);
+		}
+
 		missile.draw(g);
 
 		heli.draw(g);

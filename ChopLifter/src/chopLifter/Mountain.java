@@ -12,9 +12,9 @@ public class Mountain extends GameObj {
 
 	void init(double x) {
 		this.x = x;
-		y = Util.rand(ChopLifter.FRAME_H / 5 * 4 - 100, ChopLifter.FRAME_H / 5 * 4);
-		width = (int) Util.rand(300, 500);
-		height = (int) width / 300 * 237;
+		y = Util.rand(ChopLifter.FRAME_H / 5 * 4 - 30, ChopLifter.FRAME_H / 5 * 4 - 50);
+		width = (int) Util.rand(300, 600);
+		height = (int) Util.rand(100, 200);
 		dx = width / 500;
 	}
 
@@ -28,6 +28,6 @@ public class Mountain extends GameObj {
 	@Override
 	void blast() {
 		// TODO Auto-generated method stub
-		
+
 	}
 }
