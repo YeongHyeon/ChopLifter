@@ -152,7 +152,6 @@ public class Helicopter extends GameObj {
 				directionY = GO_NEUTRAL;
 			}
 		}
-		System.out.printf("%.0f\n", dy);
 		if (y >= landpoint && !isLanded() && directionY == GO_NEUTRAL) {
 			landing = true;
 			dy = Math.abs(initY - y) / 37;

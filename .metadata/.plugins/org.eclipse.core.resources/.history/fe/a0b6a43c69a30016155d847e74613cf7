@@ -30,32 +30,28 @@ public class Missile extends GameObj {
 			tmp_counter = 10;
 			drop = true;
 
-			init();
-		}
-	}
-	
-	void init(){
-		if (Math.abs(degree) < 5) {
-			image = img[0];
-			if (hDir > 0) { // 방향에 따라 이미지의 좌우를 대칭시킨다.
-				width = tmpW;
+			if (Math.abs(degree) < 5) {
+				image = img[0];
+				if (hDir > 0) { // 방향에 따라 이미지의 좌우를 대칭시킨다.
+					width = tmpW;
+				} else {
+					width = -tmpW;
+				}
+				height = tmpH;
 			} else {
-				width = -tmpW;
+				image = img[1];
+				if (hDir < 0) { // 방향에 따라 이미지의 좌우를 대칭시킨다.
+					width = tmpW + 5;
+				} else {
+					width = -tmpW + 5;
+				}
+				height = tmpH + 5;
 			}
-			height = tmpH;
-		} else {
-			image = img[1];
-			if (hDir > 0) { // 방향에 따라 이미지의 좌우를 대칭시킨다.
-				width = tmpW + 5;
-			} else {
-				width = -tmpW + 5;
-			}
-			height = tmpH + 5;
 		}
 	}
 
 	void setInertia() {
-		inertia_counter = 100;
+		inertia_counter = 50;
 	}
 
 	void blast() {
@@ -65,7 +61,7 @@ public class Missile extends GameObj {
 	void move() { // Target을 잃었을 경우 실행
 		if (state == ST_ALIVE) {
 			if (shotDir == 0) { // 전방 발사
-				if (hDir > 0) {
+				if (hDir == GO_LEFT) {
 					dx--;
 				} else {
 					dx++;
@@ -76,7 +72,7 @@ public class Missile extends GameObj {
 					// NOP
 				} else { // 관성이 있을때 진행방향으로 떨어짐
 					inertia_counter++;
-					if (hDir > 0) {
+					if (hDir == GO_LEFT) {
 						dx -= 0.5;
 						width = tmpW;
 					} else {

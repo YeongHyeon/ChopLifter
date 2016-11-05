@@ -9,7 +9,7 @@ import javax.imageio.ImageIO;
 @SuppressWarnings("serial")
 class ChopLifterComponent extends JComponent {
 	public static int TIME_SLICE = 50;
-	public static int MAX_CLOUD = 3;
+	public static int MAX_CLOUD = 10;
 	public static int MAX_MOUNTAIN = 30;
 	public static int MAX_ENEMY_PLANE = 3;
 	public static int MAX_PERSON = 10;
@@ -53,7 +53,7 @@ class ChopLifterComponent extends JComponent {
 		// 媛앹껜 珥덇린�솕
 		heli = new Helicopter(imgHelicopter, 130, 50);
 		for (int i = 0; i < MAX_CLOUD; i++) {
-			cloud[i] = new Cloud(imgCloud, i);
+			cloud[i] = new Cloud(imgCloud);
 		}
 
 		double mx = ChopLifter.Right_End_X;
@@ -211,19 +211,20 @@ class ChopLifterComponent extends JComponent {
 				if (heli.getDegree() <= 0 && heli.getAbsoluteX() > ChopLifter.Left_End_X + 120) {
 					heli.moveLeft();
 					missile.setInertia();
+					// shiftBackGround();
 					// System.out.println("LEFT");
 				}
 			} else if (code == KeyEvent.VK_RIGHT && !heli.isLanded()) {
 				if (heli.getDegree() >= 0 && heli.getAbsoluteX() < ChopLifter.Right_End_X - 120) {
 					heli.moveRight();
 					missile.setInertia();
+					// shiftBackGround();
 					// System.out.println("RIGHT");
 				}
 			} else if (e.getKeyChar() == 'z') {
-				missile.shot(heli.getX(), heli.getY(), heli.width, 0, heli.getDegree());
-				System.out.println(heli.width);
+				missile.shot(heli.getX(), heli.getY(), heli.directionX, 0, heli.getDegree());
 			} else if (e.getKeyChar() == 'x' && !heli.isLanded()) {
-				missile.shot(heli.getX(), heli.getY(), heli.width, 1, heli.getDegree());
+				missile.shot(heli.getX(), heli.getY(), heli.directionX, 1, heli.getDegree());
 			}
 			// �쟾泥� �떎�떆 洹몃━湲�
 			repaint();

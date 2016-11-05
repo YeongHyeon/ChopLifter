@@ -9,7 +9,7 @@ import javax.imageio.ImageIO;
 @SuppressWarnings("serial")
 class ChopLifterComponent extends JComponent {
 	public static int TIME_SLICE = 50;
-	public static int MAX_CLOUD = 3;
+	public static int MAX_CLOUD = 10;
 	public static int MAX_MOUNTAIN = 30;
 	public static int MAX_ENEMY_PLANE = 3;
 	public static int MAX_PERSON = 10;

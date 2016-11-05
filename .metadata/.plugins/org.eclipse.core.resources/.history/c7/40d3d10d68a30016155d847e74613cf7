@@ -9,28 +9,36 @@ class Cloud {
 	private double dx, width, height;
 	private Image img;
 
-	Cloud(Image img, int i) {
+	Cloud(Image img) {
 		this.img = img;
-		init(i);
+		init();
 	}
 
-	void init(int i) {
-		x = (-ChopLifter.FRAME_W) * (i);
+	void init() {
+		// x = Util.rand(ChopLifter.FRAME_W - 1);
+		// y = Util.rand(-40, ChopLifter.FRAME_H / 5 * 4);
+		// width = Util.rand(100, 300);
+		// height = width / 2;
+		if (Util.prob100(50)) {
+			x = 0;
+		} else{
+			x = -ChopLifter.FRAME_W;
+		}
 		y = ChopLifter.FRAME_H / 5 * 2;
 		width = ChopLifter.FRAME_W;
 		height = ChopLifter.FRAME_H / 5 * 4;
-		dx = width / 1000;
+		dx = width / 500;
 	}
 
 	void move() {
 		x += dx;
 		if (x > ChopLifter.FRAME_W + 100) {
-			init(2);
+			init();
 			x = -Util.rand(ChopLifter.FRAME_W / 10);
 		}
 	}
 
 	void draw(Graphics g) {
-		g.drawImage(img, (int) x, (int) (y - height / 2), (int) width, (int) height, null);
+		g.drawImage(img, (int) (x - width / 2), (int) (y - height / 2), (int) width, (int) height, null);
 	}
 }

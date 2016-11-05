@@ -2,16 +2,14 @@ package chopLifter;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Rectangle;
 
 public class Helicopter extends GameObj {
 	private Image[] img = new Image[2];
-	private int tmpW, p_counter, tilt_counter;
+	private int spin, tilt_counter;
 	private double initY, landpoint, dy;
 	private boolean landing;
-	private double relX;
+	private double absX;
 
 	Helicopter(Image[] imgHelicopter, int w, int h) {
 		state = ST_ALIVE;
@@ -20,14 +18,17 @@ public class Helicopter extends GameObj {
 		height = h;
 
 		x = ChopLifter.FRAME_W - tmpW;
-		relX = x;
+		absX = x;
 		initY = ChopLifter.FRAME_H / 5 * 4 + 10;
 		y = initY;
+		dx = 0;
+		dy = 0;
 
 		landpoint = ChopLifter.FRAME_H / 5 * 4 - 100;
 		landing = true;
 		width = tmpW;
 		image = img[0];
+		directionX = GO_NEUTRAL;
 	}
 
 	// 폭발 상태 설정
@@ -36,38 +37,33 @@ public class Helicopter extends GameObj {
 		blast_count = 15;
 	}
 
-	private void setTilt() { // 기울임 설정 Method
+	private void setDegree() { // 기울임 설정 Method
 		if (tilt_counter < 15) {
 			tilt_counter++;
 		}
 	}
 
-	int getTilt() {
+	int getDegree() {
 		return degree;
 	}
 
-	void setFixX(double fixX, int dir) {
-		x = fixX;
-		if (dir < 0) {
-			relX -= 3;
-		} else if (dir > 0) {
-			relX += 3;
-		}
+	void setFixX() {
+		x = ChopLifter.FRAME_W / 2;
 	}
 
-	double getRelativeX() {
-		return relX;
+	double getAbsoluteX() {
+		return absX;
 	}
 
 	// 왼쪽으로 이동
 	void moveLeft() {
 		directionX = GO_LEFT;
 
-		setTilt();
+		setDegree();
 		width = tmpW;
 
 		if (x >= tmpW) {
-			dx = degree / 3;
+			dx = degree;
 		}
 	}
 
@@ -75,27 +71,28 @@ public class Helicopter extends GameObj {
 	void moveRight() {
 		directionX = GO_RIGHT;
 
-		setTilt();
+		setDegree();
 		width = -tmpW;
 
 		if (x < ChopLifter.FRAME_W - tmpW) {
-			dx = degree / 3;
+			dx = degree;
 		}
 	}
 
 	// 위로 이동
 	void moveUp() {
 		directionY = GO_UP;
-		if (y >= height) {
-			y -= 3;
+		dy -= 1;
+		if (dy < -5) {
+			dy = -5;
 		}
 	}
 
 	// 아래로 이동
 	void moveDown() {
 		directionY = GO_DOWN;
-		if (y < initY) {
-			y += 3;
+		if (!isLanding()) {
+			dy = 3;
 		}
 	}
 
@@ -114,8 +111,8 @@ public class Helicopter extends GameObj {
 	}
 
 	void move() {
-		p_counter++; // 프로펠러 회전용 변수
-		image = img[p_counter % 2];
+		spin++; // 프로펠러 회전용 변수
+		image = img[spin % 2];
 
 		if (directionX == GO_LEFT) {
 			degree = -tilt_counter;
@@ -127,27 +124,48 @@ public class Helicopter extends GameObj {
 			tilt_counter--;
 		}
 
-		if (y < initY) { // 헬기를 조종하지 않으면 점점 가라앉음
-			y++;
-		}
-
-		x += dx;
-		if (relX >= ChopLifter.Left_End_X + tmpW || relX <= ChopLifter.Right_End_X - tmpW) {
-			relX += dx;
-		}
-
-		if (dx > 0) {
-			dx -= 0.3;
-			if (dx < 0) {
-				dx = 0;
-				directionX = GO_NEUTRAL;
-			}
+		if (dx < 0 && x + dx < tmpW) {
+			x = tmpW;
+		} else if (dx > 0 && x + dx > ChopLifter.FRAME_W - tmpW) {
+			x = ChopLifter.FRAME_W - tmpW;
 		} else {
-			dx += 0.3;
-			if (dx > 0) {
-				dx = 0;
-				directionX = GO_NEUTRAL;
+			x += dx;
+		}
+
+		if (dx < 0 && absX + dx < ChopLifter.Left_End_X + tmpW) {
+			absX = ChopLifter.Left_End_X + tmpW;
+		} else if (dx > 0 && absX + dx > ChopLifter.Right_End_X - tmpW) {
+			absX = ChopLifter.Right_End_X - tmpW;
+		} else {
+			absX += dx;
+		}
+
+		if (dy < 0 && y + dy < height) {
+			y = height;
+		} else if (dy > 0 && y + dy > initY) {
+			y = initY;
+		} else if (directionX == GO_NEUTRAL){
+			y += dy;
+			if (dy < 3) {
+				dy += 0.5;
+			} else {
+				directionY = GO_NEUTRAL;
 			}
+		}
+		System.out.printf("%.0f\n", dy);
+		if (y >= landpoint && !isLanded() && directionY == GO_NEUTRAL) {
+			landing = true;
+			dy = Math.abs(initY - y) / 37;
+			if (dy < 1) {
+				dy = 1;
+			}
+		} else if (y < landpoint) {
+			landing = false;
+		}
+
+		dx = degree;
+		if (degree == 0) {
+			directionX = GO_NEUTRAL;
 		}
 
 		// 터졌을때
@@ -158,21 +176,6 @@ public class Helicopter extends GameObj {
 			}
 		} else if (state == ST_BLAST) {
 			blast_count--;
-		}
-
-		if (y >= landpoint && !isLanded() && directionY == GO_DOWN) {
-			landing = true;
-			directionY = GO_DOWN;
-			dy = Math.abs(initY - y) / 20;
-			if (dy < 0.1) {
-				dy = 0.05;
-			}
-			if (y < initY) {
-				y += dy;
-			}
-		} else {
-			directionY = GO_UP;
-			landing = false;
 		}
 	}
 
