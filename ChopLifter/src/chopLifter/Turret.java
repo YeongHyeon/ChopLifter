@@ -7,7 +7,7 @@ public class Turret extends GameObj {
 	private Image[] img = new Image[2];
 	private int heliX;
 
-	// »ý¼ºÀÚ
+	// Â»Ã½Â¼ÂºÃ€Ãš
 	Turret(Image[] imgTurret, double tx, int w, int h) {
 		img = imgTurret;
 		state = ST_ALIVE;
@@ -17,7 +17,7 @@ public class Turret extends GameObj {
 		height = h;
 		image = img[0];
 	}
-	
+
 	void blast() {
 		state = ST_BLAST;
 		blast_count = 15;

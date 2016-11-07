@@ -5,8 +5,10 @@ import java.awt.Image;
 
 public class EnemyPlane extends GameObj {
 	private Image[] img = new Image[2];
-	private boolean uTurn;
+	private int uTurn;
 	private int spin;
+	private int turnPoint = 140;
+	private boolean noTurn = false;
 
 	EnemyPlane(Image[] imgEnemyPlane, int w, int h) {
 		img = imgEnemyPlane;
@@ -16,13 +18,15 @@ public class EnemyPlane extends GameObj {
 		height = h;
 	}
 
-	void birth(double heliX) { // 이동방향, 이동속도, 출발높이, 전환지점을 지정함.
+	void birth() { // 이동방향, 이동속도, 출발높이, 전환지점을 지정함.
 		state = ST_ALIVE;
 		x = -tmpW;
-		dx = 0;
 		y = Util.rand(70, ChopLifter.FRAME_H / 5 * 3);
-		uTurn = false;
+		dx = 0;
+		dy = 0;
+		uTurn = 0;
 		image = img[0];
+		noTurn = false;
 	}
 
 	// 폭발 상태 설정
@@ -31,31 +35,51 @@ public class EnemyPlane extends GameObj {
 		blast_count = 15;
 	}
 
+	void fall() {
+		if (state == ST_ALIVE) {
+			dy = 10;
+			noTurn = true;
+		}
+	}
+
 	void move() {
-		spin++; // 프로펠러 회전용 변수
-		image = img[spin % 2];
+		spin++; // 프로펠러 회전용 변수 
+		image = img[spin % 2]; 
+
 		
 		// ALIVE 상태에서는 좌우로 이동
 		if (state == ST_ALIVE) {
-			if (x > ChopLifter.FRAME_W / 3) {
-				uTurn = true;
+			if (x > ChopLifter.FRAME_W - 140) {
+				uTurn = 1;
+			} else if (x < 140 && uTurn != 2) {
+				uTurn = 2;
+			}
+			if (y >= ChopLifter.FRAME_H / 5 * 4) {
+				blast();
 			}
 
-			if (uTurn == false) {
-				width = tmpW;
+			if (uTurn == 0) {
+				if (noTurn == false)
+					width = tmpW;
 				if (dx < 10) {
 					dx += 0.5;
 				}
-			} else {
-				width = -tmpW;
-				dx -= 0.5;
-			}
-
-			if (x < -tmpW || ChopLifter.FRAME_W + tmpW < x) {
-				state = ST_DEATH;
+			} else if (uTurn == 1) {
+				if (noTurn == false)
+					width = -tmpW;
+				if (dx > -10) {
+					dx -= 0.5;
+				}
+			} else if (uTurn == 2) {
+				if (noTurn == false)
+					width = tmpW;
+				if (dx < 10) {
+					dx += 0.5;
+				}
 			}
 
 			x += dx;
+			y += dy;
 		}
 		// BLAST 상태에서는 count 시간 후 DEATH로 설정
 		else if (state == ST_BLAST) {

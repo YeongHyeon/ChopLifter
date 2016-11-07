@@ -140,18 +140,18 @@ public class Helicopter extends GameObj {
 			absX += dx;
 		}
 
-		if (dy < 0 && y + dy < height) {
+		if (dy < 0 && y + dy <= height) {
 			y = height;
-		} else if (dy > 0 && y + dy > initY) {
+		} else if (dy > 0 && y + dy >= initY) {
 			y = initY;
-		} else if (directionX == GO_NEUTRAL){
+		}
+		if (directionX == GO_NEUTRAL || directionY == GO_NEUTRAL){
 			y += dy;
 			if (dy < 3) {
 				dy += 0.5;
-			} else {
-				directionY = GO_NEUTRAL;
 			}
-		}
+		} 
+		
 		if (y >= landpoint && !isLanded() && directionY == GO_NEUTRAL) {
 			landing = true;
 			dy = Math.abs(initY - y) / 37;
@@ -166,6 +166,7 @@ public class Helicopter extends GameObj {
 		if (degree == 0) {
 			directionX = GO_NEUTRAL;
 		}
+		directionY = GO_NEUTRAL;
 
 		// 터졌을때
 		if (state == ST_BLAST) {

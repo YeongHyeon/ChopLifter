@@ -1,0 +1,83 @@
+package chopLifter;
+
+import java.awt.Graphics;
+import java.awt.Image;
+
+public class TurretBomb extends GameObj {
+	private double dx, dy; // 폭탄의 단위 이동 거리
+	private Image img;
+	private int tmpW, tmpH;
+	TurretBomb(Image img, int w, int h) {
+		image = img;
+		state = ST_DEATH;
+		tmpW = w;
+		width = tmpW;
+		tmpH = h;
+		height = tmpH;
+	}
+
+	// x, y 위치에서 mx, my 위치로 폭탄 발사
+	void shot(double x, double y, double mx, double my) { // 폭탄의 좌표 : x,y , 우주선의
+		// 자표 : mx, my
+		if (state == ST_DEATH) {
+			state = ST_ALIVE;
+			this.x = x;
+			this.y = y;
+			dx = (mx - x) / 50; // 폭탄과 우주선 사이의 x좌표 거리를 50등분하여 폭탄의 이동거리 좌표를 정해주었다
+			dy = (my - y) / 50; // 폭탄과 우주선 사이의 y좌표 거리를 50등분하여 폭탄의 이동거리 좌표를
+			// 정해주었다.
+
+			double rate = dy / dx;
+
+			if(Math.abs(dx)<=2){ // 수직일때
+				if(dy > 0)
+					dy = 3;
+				else 
+					dy = -3;
+			}
+			else{// 아닐때
+				if(dx > 0){
+					dy = 5*rate;
+					dx = 5;
+				}
+				else if(dx < 0){
+					dy = -5*rate;
+					dx = -5;
+				}
+			}
+
+			if(dx < 0){
+				width = -tmpW;
+			} else {
+				width = tmpW;
+			}
+			if(dy < 0){
+				height = -tmpH;
+			} else {
+				height = tmpH;
+			}
+		}
+		System.out.printf("SHOT%4d%4d\n", x, y);
+	}
+
+	void blast() {
+		state = ST_DEATH;
+	}
+
+	// 타이머에 의한 폭탄의 움직임 처리
+	void move() {
+		if (state == ST_ALIVE) {
+			x += dx;
+			y += dy;
+			if (y < -40 || ChopLifter.FRAME_H + 40 < y || x < -40 || ChopLifter.FRAME_W + 40 < x) {
+				state = ST_DEATH;
+			}
+		}
+	}
+
+	// 폭탄 그리기
+	void draw(Graphics g) {
+		if (state == ST_ALIVE)
+			drawImage(g);
+	}
+}

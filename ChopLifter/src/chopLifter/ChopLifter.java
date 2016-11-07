@@ -9,11 +9,13 @@ import javax.imageio.ImageIO;
 @SuppressWarnings("serial")
 class ChopLifterComponent extends JComponent {
 	public static int TIME_SLICE = 50;
-	public static int MAX_CLOUD = 3;
+	public static int MAX_CLOUD = 15;
 	public static int MAX_MOUNTAIN = 30;
 	public static int MAX_ENEMY_PLANE = 3;
 	public static int MAX_PERSON = 10;
 	public static int MAX_TURRET = 50;
+	public static int MAX_BOMB = 3;
+	public static int MAX_TURRETBOMB = 2;
 
 	private Timer t;
 	private Cloud[] cloud = new Cloud[MAX_CLOUD];
@@ -21,9 +23,11 @@ class ChopLifterComponent extends JComponent {
 	private Helicopter heli;
 	private EnemyPlane[] enemyPlane = new EnemyPlane[MAX_ENEMY_PLANE];
 	private Missile missile;
-	private Bomb bomb;
+	private Bomb[] bomb = new Bomb[MAX_BOMB];
 	private Turret[] turr = new Turret[MAX_TURRET];
-	Image imgCloud, imgMountain, imgPlaneBomb;
+	private TurretBomb[] turretbomb = new TurretBomb[MAX_TURRETBOMB];
+
+	Image imgCloud, imgMountain, imgPlaneBomb, imgTurretBomb;
 	Image[] imgHelicopter = new Image[2];
 	Image[] imgEnemyPlane = new Image[2];
 	Image[] imgMissile = new Image[2];
@@ -44,6 +48,7 @@ class ChopLifterComponent extends JComponent {
 			imgPlaneBomb = ImageIO.read(new File("images/bomb.png"));
 			imgTurret[0] = ImageIO.read(new File("images/TurretRight.png"));
 			imgTurret[1] = ImageIO.read(new File("images/TurretLeft.png"));
+			imgTurretBomb = ImageIO.read(new File("images/TurretBomb.png"));
 			System.out.println("ImageRead");
 		} catch (IOException e) {
 			System.out.println("IOException Exit Program");
@@ -65,11 +70,17 @@ class ChopLifterComponent extends JComponent {
 			enemyPlane[i] = new EnemyPlane(imgEnemyPlane, 110, 50);
 		}
 		missile = new Missile(imgMissile, 30, 15);
-		bomb = new Bomb(imgPlaneBomb, 30, 30);
+		for (int i = 0; i < MAX_BOMB; i++) {
+			bomb[i] = new Bomb(imgPlaneBomb, 30, 30);
+		}
+
 		double tx = ChopLifter.Left_End_X;
 		for (int i = 0; i < MAX_TURRET; i++) {
 			turr[i] = new Turret(imgTurret, tx, 30, 76);
 			tx += Util.rand(100, ChopLifter.FRAME_W / 3);
+		}
+		for (int i = 0; i < MAX_TURRETBOMB; i++) {
+			turretbomb[i] = new TurretBomb(imgTurretBomb, 20, 20); // 폭탄 생성
 		}
 
 		// �궎 �씠踰ㅽ듃 �벑濡�
@@ -98,48 +109,69 @@ class ChopLifterComponent extends JComponent {
 
 			for (EnemyPlane ep : enemyPlane) {
 				if (ep.getState() == EnemyPlane.ST_DEATH && Util.prob100(10)) {
-					ep.birth(heli.getX());
+					ep.birth();
 				}
-				if (ep.getState() == EnemyPlane.ST_ALIVE && Util.prob100(1) && !heli.isLanded() && !heli.isLanding()) {
-					// bomb.shot(ep.getX(), ep.getY(), heli.getX(),
-					// heli.getY());
+				if (ep.getState() == EnemyPlane.ST_ALIVE && Util.prob100(1) && !heli.isLanded()) {
+					if (ep.getY() <= heli.getY() && !heli.isLanding())
+						for (Bomb b : bomb) {
+							b.shot(ep.getX(), ep.getY(), heli.getX(), heli.getY());
+						}
 				}
 
 				if (ep.getState() == EnemyPlane.ST_ALIVE && heli.getState() == heli.ST_ALIVE) {
 					if (heli.getBBox().intersects(ep.getBBox())) {
 						heli.blast();
-						ep.blast();
+					}
+				}
+
+				if (missile.getState() == missile.ST_ALIVE) {
+					if (ep.getState() == EnemyPlane.ST_ALIVE) {
+						if (ep.getBBox().intersects(missile.getBBox())) {
+							ep.fall();
+							missile.blast();
+							break; // 하나 터지면 탈출
+						}
 					}
 				}
 				ep.move();
 			}
 
 			missile.move();
-			for (EnemyPlane ep : enemyPlane) {
-				if (missile.getState() == Missile.ST_ALIVE) {
-					if (ep.getState() == EnemyPlane.ST_ALIVE) {
-						if (ep.getBBox().intersects(missile.getBBox())) {
-							ep.blast();
-							missile.blast();
-							break; // �븯�굹 �꽣吏�硫� �깉異�
+
+			for (Bomb b : bomb) {
+				b.move();
+				if (b.getState() == Bomb.ST_ALIVE) {
+					if (heli.getState() == Helicopter.ST_ALIVE) {
+						if (heli.getBBox().intersects(b.getBBox())) {
+							heli.blast();
+							b.blast();
 						}
 					}
 				}
 			}
 
-			bomb.move();
-			// �룺�깂 異⑸룎泥섎━
-			if (bomb.getState() == Bomb.ST_ALIVE) {
-				if (heli.getState() == Helicopter.ST_ALIVE) {
-					if (heli.getBBox().intersects(bomb.getBBox())) {
-						heli.blast();
-						bomb.blast();
+			for (TurretBomb t : turretbomb) {
+				t.move();
+				if (t.getState() == TurretBomb.ST_ALIVE) {
+					if (t.getState() == Helicopter.ST_ALIVE) {
+						if (heli.getBBox().intersects(t.getBBox())) {
+							heli.blast();
+							t.blast();
+						}
 					}
 				}
 			}
 
 			for (int i = 0; i < MAX_TURRET; i++) {
 				turr[i].setPosin(heli.getX());
+				int shotT = turretShot();
+				for (TurretBomb t : turretbomb) {
+					if (t.getState() == TurretBomb.ST_DEATH) {
+						if (turr[i].getState() == Turret.ST_ALIVE && Util.prob100(3) && (shotT != -1)) {
+							t.shot(turr[shotT].getX(), turr[shotT].getY(), heli.getX(), heli.getY());
+						}
+					}
+				}
 			}
 
 			shiftBackGround();
@@ -159,14 +191,18 @@ class ChopLifterComponent extends JComponent {
 					// NOP
 				} else {
 					for (Mountain m : mountain) {
-						m.setShift(heli.getDegree() / 5 * 3); // �궛�씠 ��吏곸씠�뒗
-																// �냽�룄�뒗 �굹以묒뿉
-																// �뜑 �뒓由ш쾶 �닔�\
+						m.setShift(heli.getDegree() / 5 * 3); 
 					}
 					for (EnemyPlane ep : enemyPlane) {
 						ep.setShift(heli.getDegree());
 					}
+					for (Bomb b : bomb) {
+						b.setShift(heli.getDegree());
+					}
 					for (Turret t : turr) {
+						t.setShift(heli.getDegree());
+					}
+					for (TurretBomb t : turretbomb) {
 						t.setShift(heli.getDegree());
 					}
 				}
@@ -184,7 +220,13 @@ class ChopLifterComponent extends JComponent {
 					for (EnemyPlane ep : enemyPlane) {
 						ep.setShift(heli.getDegree());
 					}
+					for (Bomb b : bomb) {
+						b.setShift(heli.getDegree());
+					}
 					for (Turret t : turr) {
+						t.setShift(heli.getDegree());
+					}
+					for (TurretBomb t : turretbomb) {
 						t.setShift(heli.getDegree());
 					}
 				}
@@ -194,6 +236,23 @@ class ChopLifterComponent extends JComponent {
 				&& absX < (ChopLifter.Right_End_X - ChopLifter.FRAME_W / 2)) {
 			heli.setFixX();
 		}
+	}
+
+	int turretShot() {
+		double dist = 0, minDist = 300;
+		int index = -1;
+		if (!heli.isLanded() && !heli.isLanding()) {
+			for (int i = 0; i < MAX_TURRET; i++) {
+				dist = Math.sqrt(Math.pow(heli.getX() - turr[i].getX(), 2) + Math.pow(heli.getY() - turr[i].getY(), 2));
+				if (heli.getY() > 150) {
+					if (dist < minDist) {
+						minDist = dist;
+						index = i;
+					}
+				}
+			}
+		}
+		return index;
 	}
 
 	class KeyHandler extends KeyAdapter {
@@ -211,6 +270,7 @@ class ChopLifterComponent extends JComponent {
 				if (heli.getDegree() <= 0 && heli.getAbsoluteX() > ChopLifter.Left_End_X + 120) {
 					heli.moveLeft();
 					missile.setInertia();
+					
 					// System.out.println("LEFT");
 				}
 			} else if (code == KeyEvent.VK_RIGHT && !heli.isLanded()) {
@@ -259,12 +319,19 @@ class ChopLifterComponent extends JComponent {
 		g.setColor(new Color(255, 188, 81));
 		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4 + 60, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
 
-		bomb.draw(g);
 		for (EnemyPlane ep : enemyPlane) {
 			ep.draw(g);
 		}
 
 		for (Turret t : turr) {
+			t.draw(g);
+		}
+
+		for (Bomb b : bomb) {
+			b.draw(g);
+		}
+
+		for (TurretBomb t : turretbomb) {
 			t.draw(g);
 		}
 
