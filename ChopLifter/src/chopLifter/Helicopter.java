@@ -145,7 +145,7 @@ public class Helicopter extends GameObj {
 		} else if (dy > 0 && y + dy >= initY) {
 			y = initY;
 		}
-		if (directionX == GO_NEUTRAL || directionY == GO_NEUTRAL){
+		if (directionX == GO_NEUTRAL){
 			y += dy;
 			if (dy < 3) {
 				dy += 0.5;
@@ -166,7 +166,6 @@ public class Helicopter extends GameObj {
 		if (degree == 0) {
 			directionX = GO_NEUTRAL;
 		}
-		directionY = GO_NEUTRAL;
 
 		// 터졌을때
 		if (state == ST_BLAST) {

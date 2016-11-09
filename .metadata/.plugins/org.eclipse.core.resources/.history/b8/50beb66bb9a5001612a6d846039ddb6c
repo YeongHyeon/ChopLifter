@@ -74,10 +74,10 @@ class ChopLifterComponent extends JComponent {
 			bomb[i] = new Bomb(imgPlaneBomb, 30, 30);
 		}
 
-		double tx = 100;
+		double tx = ChopLifter.Left_End_X;
 		for (int i = 0; i < MAX_TURRET; i++) {
 			turr[i] = new Turret(imgTurret, tx, 30, 76);
-			tx -= Util.rand(ChopLifter.FRAME_W / 3, ChopLifter.FRAME_W / 3 * 2);
+			tx += Util.rand(100, ChopLifter.FRAME_W / 3);
 		}
 		for (int i = 0; i < MAX_TURRETBOMB; i++) {
 			turretbomb[i] = new TurretBomb(imgTurretBomb, 20, 20); // 폭탄 생성
