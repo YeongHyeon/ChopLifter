@@ -36,26 +36,21 @@ public class EnemyPlane extends GameObj {
 	}
 
 	void fall() {
-		if (state == ST_ALIVE) {
-			dy = 10;
-			noTurn = true;
-		}
+		state = ST_FALLING;
+		dy = 10;
+		noTurn = true;
 	}
 
 	void move() {
-		spin++; // 프로펠러 회전용 변수 
-		image = img[spin % 2]; 
+		spin++; // 프로펠러 회전용 변수
+		image = img[spin % 2];
 
-		
 		// ALIVE 상태에서는 좌우로 이동
 		if (state == ST_ALIVE) {
 			if (x > ChopLifter.FRAME_W - 140) {
 				uTurn = 1;
 			} else if (x < 140 && uTurn != 2) {
 				uTurn = 2;
-			}
-			if (y >= ChopLifter.FRAME_H / 5 * 4) {
-				blast();
 			}
 
 			if (uTurn == 0) {
@@ -87,11 +82,17 @@ public class EnemyPlane extends GameObj {
 			if (blast_count == 0) {
 				state = ST_DEATH;
 			}
+		} else if (state == ST_FALLING) {
+			x += dx;
+			y += dy;
+			if (y >= ChopLifter.FRAME_H / 5 * 4) {
+				blast();
+			}
 		}
 	}
 
 	void draw(Graphics g) {
-		if (state == ST_ALIVE) {
+		if (state == ST_ALIVE || state == ST_FALLING) {
 			drawImage(g);
 		} else if (state == ST_BLAST) {
 			drawBlast(g);

@@ -12,16 +12,18 @@ abstract public class GameObj extends JPanel {
 	public static int ST_DEATH = 0;
 	public static int ST_ALIVE = 1;
 	public static int ST_BLAST = 2;
+	public static int ST_FALLING = 3;
 
-	public static int GO_RIGHT = 3;
-	public static int GO_LEFT = 4;
-	public static int GO_UP = 5;
-	public static int GO_DOWN = 6;
-	public static int GO_NEUTRAL = 7;
+	public static int GO_RIGHT = 0;
+	public static int GO_LEFT = 1;
+	public static int GO_UP = 2;
+	public static int GO_DOWN = 3;
+	public static int GO_NEUTRAL = 4;
 
 	Image image; // 게임 객체 이미지
 	int state; // 게임 객체 상태
 	double x, y, dx, dy; // 게임 객체 위치
+	double absX;
 	int tmpW, tmpH;
 	int width, height, degree; // 게임 객체 크기
 	int blast_count; // 폭발 카운트

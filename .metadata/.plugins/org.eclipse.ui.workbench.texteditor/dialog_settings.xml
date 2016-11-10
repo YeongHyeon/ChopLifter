@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="System" key="selection"/>
+		<item value="" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="print"/>
+			<item value="void setShift(double gx) {"/>
+			<item value="person"/>
+			<item value="setposin"/>
+			<item value="fall"/>
 			<item value="system"/>
 			<item value="blast"/>
 			<item value="turr"/>
-			<item value="x"/>
-			<item value="TurretBomb"/>
-			<item value="width"/>
-			<item value="plane"/>
-			<item value="Plane"/>
 		</list>
 		<list key="replacehistory">
 			<item value="Bomb"/>

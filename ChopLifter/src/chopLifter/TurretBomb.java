@@ -13,8 +13,7 @@ public class TurretBomb extends GameObj {
 	}
 
 	// x, y 위치에서 mx, my 위치로 폭탄 발사
-	void shot(double x, double y, double mx, double my) { // 폭탄의 좌표 : x,y , 우주선의
-		// 자표 : mx, my
+	void shot(double x, double y, double mx, double my) { // 폭탄의 좌표 : x,y 
 		if (state == ST_DEATH) {
 			state = ST_ALIVE;
 			this.x = x;
@@ -46,6 +45,8 @@ public class TurretBomb extends GameObj {
 
 	void blast() {
 		state = ST_DEATH;
+		x = ChopLifter.FRAME_W;
+		y = ChopLifter.FRAME_H;
 	}
 
 	// 타이머에 의한 폭탄의 움직임 처리

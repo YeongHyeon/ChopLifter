@@ -40,6 +40,8 @@ public class Bomb extends GameObj {
 	// 폭발 상태 설정
 	void blast() {
 		state = ST_DEATH;
+		x = ChopLifter.FRAME_W;
+		y = ChopLifter.FRAME_H;
 	}
 
 	void move() {

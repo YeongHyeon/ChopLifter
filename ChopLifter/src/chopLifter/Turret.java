@@ -6,8 +6,9 @@ public class Turret extends GameObj {
 
 	private Image[] img = new Image[2];
 	private int heliX;
+	private int poro_num;
 
-	// »ý¼ºÀÚ
+	// 생성자
 	Turret(Image[] imgTurret, double tx, int w, int h) {
 		img = imgTurret;
 		state = ST_ALIVE;
@@ -16,6 +17,7 @@ public class Turret extends GameObj {
 		width = w;
 		height = h;
 		image = img[0];
+		poro_num = 0;
 	}
 
 	void blast() {
@@ -30,9 +32,13 @@ public class Turret extends GameObj {
 			image = img[1];
 		}
 	}
-
-	void death() {
-		state = ST_DEATH;
+	
+	void setPoro() {
+		poro_num++;
+	}
+	
+	int getPoro() {
+		return poro_num;
 	}
 
 	void move() {

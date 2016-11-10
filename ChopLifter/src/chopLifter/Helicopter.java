@@ -9,7 +9,6 @@ public class Helicopter extends GameObj {
 	private int spin, tilt_counter;
 	private double initY, landpoint, dy;
 	private boolean landing;
-	private double absX;
 
 	Helicopter(Image[] imgHelicopter, int w, int h) {
 		state = ST_ALIVE;

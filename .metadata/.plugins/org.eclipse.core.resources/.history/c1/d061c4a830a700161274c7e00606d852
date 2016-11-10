@@ -1,0 +1,48 @@
+package chopLifter;
+
+import java.awt.Graphics;
+import java.awt.Image;
+
+public class HelicopterBase extends GameObj {
+
+	HelicopterBase(Image img, int w, int h) {
+		image = img;
+		state = ST_DEATH; // 처음 만들 때 Death상태로 생성함.
+		tmpW = w;
+		tmpH = h;
+		width = w;
+		height = h;
+	}
+
+	// 폭발 상태 설정
+	void blast() {
+		state = ST_BLAST;
+		blast_count = 15;
+		y += 3;
+		int tmp = width;
+		width = height;
+		height = tmp;
+	}
+	
+	void move() {
+		// ALIVE 상태에서는 좌우로 이동
+		if (state == ST_ALIVE) {
+			
+		}
+		// BLAST 상태에서는 count 시간 후 DEATH로 설정
+		else if (state == ST_BLAST) {
+			blast_count--;
+			if (blast_count == 0) {
+				state = ST_DEATH;
+			}
+		}
+	}
+
+	void draw(Graphics g) {
+		if (state == ST_ALIVE) {
+			drawImage(g);
+		} else if (state == ST_BLAST) {
+			drawImage(g);
+		}
+	}
+}

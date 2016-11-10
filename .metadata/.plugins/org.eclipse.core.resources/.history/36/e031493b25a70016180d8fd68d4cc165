@@ -1,0 +1,94 @@
+package chopLifter;
+
+import java.awt.Graphics;
+import java.awt.Image;
+
+public class Person extends GameObj {
+	private Image[] imgP = new Image[2];
+	private int p_counter, pointer;
+	private double initX;
+
+	Person(Image img[], int w, int h) {
+		imgP = img;
+		state = ST_DEATH; // 처음 만들 때 Death상태로 생성함.
+		width = w;
+		height = h;
+	}
+
+	void birth(double tx, double ty) { // 이동방향, 이동속도, 출발높이, 전환지점을 지정함.
+		state = ST_ALIVE;
+		initX = tx;
+		x = tx;
+		y = ty;
+		dx = Util.rand(1, 3);
+		if (Util.prob100(50)) {
+			dx *= -1;
+		}
+	}
+
+	// 폭발 상태 설정
+	void blast() {
+		state = ST_BLAST;
+		blast_count = 15;
+	}
+
+	void shakeBody() {
+		p_counter++;
+		if (p_counter % 10 == 0) {
+			pointer++;
+		}
+	}
+
+	void move() {
+		shakeBody();
+		// ALIVE 상태에서는 좌우로 이동
+		if (state == ST_ALIVE) {
+			x += dx;
+			if (Math.abs(initX - x) > 100) {
+				dx *= -1;
+			}
+		}
+		// BLAST 상태에서는 count 시간 후 DEATH로 설정
+		else if (state == ST_BLAST) {
+			blast_count--;
+			if (blast_count == 0) {
+				state = ST_DEATH;
+			}
+		}
+	}
+
+	int boarding(double px, double py) {
+		if (state == ST_ALIVE) {
+			shakeBody();
+			if (x < px) {
+				x += 2;
+			} else if (x <= px + 2 && x >= px - 2) {
+
+			} else {
+				x -= 2;
+			}
+
+			if (y < py) {
+				y += 2;
+			} else if (y < ChopLifter.FRAME_H - 90) {
+
+			} else {
+				y -= 2;
+			}
+
+			if (x <= px + 2 && x >= px - 2 && y < ChopLifter.FRAME_H - 90) {
+				state = ST_DEATH;
+				return 1;
+			}
+		}
+		return 0;
+	}
+
+	void draw(Graphics g) {
+		if (state == ST_ALIVE) {
+			g.drawImage(imgP[pointer % 2], (int) (x - width / 2), (int) (y - height / 2), width, height, null);
+		} else if (state == ST_BLAST) {
+			drawBlast(g);
+		}
+	}
+}
