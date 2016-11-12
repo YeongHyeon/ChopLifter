@@ -78,18 +78,18 @@ public class Person extends GameObj {
 		}
 	}
 
-	int boarding(double px, double py) {
+	boolean boarding(double hx, double hy) {
 		if (state == ST_ALIVE) {
 			shakeBody();
-			if (x < px) {
+			if (x < hx) {
 				x += 2;
-			} else if (x <= px + 2 && x >= px - 2) {
+			} else if (x <= hx + 2 && x >= hx - 2) {
 
 			} else {
 				x -= 2;
 			}
 
-			if (y < py) {
+			if (y < hy) {
 				y += 2;
 			} else if (y < ChopLifter.FRAME_H - 90) {
 
@@ -97,12 +97,12 @@ public class Person extends GameObj {
 				y -= 2;
 			}
 
-			if (x <= px + 2 && x >= px - 2 && y < ChopLifter.FRAME_H - 90) {
+			if (x <= hx + 2 && x >= hx - 2 && y < ChopLifter.FRAME_H - 90) {
 				state = ST_DEATH;
-				return 1;
+				return true;
 			}
 		}
-		return 0;
+		return false;
 	}
 
 	void draw(Graphics g) {

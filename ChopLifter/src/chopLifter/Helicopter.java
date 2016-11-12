@@ -11,11 +11,14 @@ public class Helicopter extends GameObj {
 	private boolean landing;
 
 	Helicopter(Image[] imgHelicopter, int w, int h) {
-		state = ST_ALIVE;
+		state = ST_DEATH;
 		img = imgHelicopter;
 		tmpW = w;
 		height = h;
 
+		init();
+	}
+	void init(){
 		x = ChopLifter.FRAME_W - tmpW;
 		absX = x;
 		initY = ChopLifter.FRAME_H / 5 * 4 + 10;
@@ -30,10 +33,20 @@ public class Helicopter extends GameObj {
 		directionX = GO_NEUTRAL;
 	}
 
+	// 게임 시작
+	void startHelicopter() {
+		state = ST_ALIVE;
+		init();
+	}
+
 	// 폭발 상태 설정
 	void blast() {
 		state = ST_BLAST;
-		blast_count = 15;
+		blast_count = 30;
+	}
+	
+	void death() {
+		state = ST_DEATH;
 	}
 
 	private void setDegree() { // 기울임 설정 Method
@@ -144,13 +157,13 @@ public class Helicopter extends GameObj {
 		} else if (dy > 0 && y + dy >= initY) {
 			y = initY;
 		}
-		if (directionX == GO_NEUTRAL){
+		if (directionX == GO_NEUTRAL) {
 			y += dy;
 			if (dy < 3) {
 				dy += 0.5;
 			}
-		} 
-		
+		}
+
 		if (y >= landpoint && !isLanded() && directionY == GO_NEUTRAL) {
 			landing = true;
 			dy = Math.abs(initY - y) / 37;

@@ -15,16 +15,11 @@ class Cloud {
 	}
 
 	void init(int i) {
-		x = Util.rand(ChopLifter.FRAME_W - 1);
-		y = Util.rand(-40, ChopLifter.FRAME_H / 5 * 4);
-		width = Util.rand(100, 300);
-		height = width / 2;
-		dx = width / 500;
-//		x = (-ChopLifter.FRAME_W) * (i);
-//		y = ChopLifter.FRAME_H / 5 * 2;
-//		width = ChopLifter.FRAME_W;
-//		height = ChopLifter.FRAME_H / 5 * 4;
-//		dx = width / 1000;
+		x = (-ChopLifter.FRAME_W) * (i);
+		y = ChopLifter.FRAME_H / 5 * 2;
+		width = ChopLifter.FRAME_W;
+		height = ChopLifter.FRAME_H / 5 * 4;
+		dx = 0.5;
 	}
 
 	void move() {

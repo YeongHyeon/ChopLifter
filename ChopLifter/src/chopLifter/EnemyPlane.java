@@ -41,6 +41,10 @@ public class EnemyPlane extends GameObj {
 		noTurn = true;
 	}
 
+	void death() {
+		state = ST_DEATH;
+	}
+
 	void move() {
 		spin++; // 프로펠러 회전용 변수
 		image = img[spin % 2];
