@@ -79,9 +79,7 @@ public class EnemyPlane extends GameObj {
 
 			x += dx;
 			y += dy;
-		}
-		// BLAST 상태에서는 count 시간 후 DEATH로 설정
-		else if (state == ST_BLAST) {
+		} else if (state == ST_BLAST) {
 			blast_count--;
 			if (blast_count == 0) {
 				state = ST_DEATH;

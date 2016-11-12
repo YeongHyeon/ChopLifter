@@ -18,7 +18,8 @@ public class Helicopter extends GameObj {
 
 		init();
 	}
-	void init(){
+
+	void init() {
 		x = ChopLifter.FRAME_W - tmpW;
 		absX = x;
 		initY = ChopLifter.FRAME_H / 5 * 4 + 10;
@@ -44,7 +45,7 @@ public class Helicopter extends GameObj {
 		state = ST_BLAST;
 		blast_count = 30;
 	}
-	
+
 	void death() {
 		state = ST_DEATH;
 	}
@@ -192,7 +193,6 @@ public class Helicopter extends GameObj {
 
 	void draw(Graphics g) {
 		if (state == ST_ALIVE) {
-			// drawImage(g);
 			drawTiltImage(g);
 		} else if (state == ST_BLAST) {
 			if (blast_count % 2 == 0) {

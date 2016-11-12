@@ -5,6 +5,7 @@ import java.awt.Image;
 
 public class TurretBomb extends GameObj {
 	private Image img;
+
 	TurretBomb(Image img, int w, int h) {
 		image = img;
 		state = ST_DEATH;
@@ -13,7 +14,7 @@ public class TurretBomb extends GameObj {
 	}
 
 	// x, y À§Ä¡¿¡¼­ mx, my À§Ä¡·Î ÆøÅº ¹ß»ç
-	void shot(double x, double y, double mx, double my) { // ÆøÅºÀÇ ÁÂÇ¥ : x,y 
+	void shot(double x, double y, double mx, double my) { // ÆøÅºÀÇ ÁÂÇ¥ : x,y
 		if (state == ST_DEATH) {
 			state = ST_ALIVE;
 			this.x = x;
@@ -24,19 +25,17 @@ public class TurretBomb extends GameObj {
 
 			double rate = dy / dx;
 
-			if(Math.abs(dx)<=2){ // ¼öÁ÷ÀÏ¶§
-				if(dy > 0)
+			if (Math.abs(dx) <= 2) { // ¼öÁ÷ÀÏ¶§
+				if (dy > 0)
 					dy = 3;
-				else 
+				else
 					dy = -3;
-			}
-			else{// ¾Æ´Ò¶§
-				if(dx > 0){
-					dy = 5*rate;
+			} else {// ¾Æ´Ò¶§
+				if (dx > 0) {
+					dy = 5 * rate;
 					dx = 5;
-				}
-				else if(dx < 0){
-					dy = -5*rate;
+				} else if (dx < 0) {
+					dy = -5 * rate;
 					dx = -5;
 				}
 			}
@@ -44,9 +43,8 @@ public class TurretBomb extends GameObj {
 	}
 
 	void blast() {
-		state = ST_DEATH;
-		x = ChopLifter.FRAME_W;
-		y = ChopLifter.FRAME_H;
+		state = ST_BLAST;
+		blast_count = 10;
 	}
 
 	// Å¸ÀÌ¸Ó¿¡ ÀÇÇÑ ÆøÅºÀÇ ¿òÁ÷ÀÓ Ã³¸®
@@ -54,7 +52,16 @@ public class TurretBomb extends GameObj {
 		if (state == ST_ALIVE) {
 			x += dx;
 			y += dy;
-			if (y < -40 || ChopLifter.FRAME_H + 40 < y || x < -40 || ChopLifter.FRAME_W + 40 < x) {
+			if (y < -height || ChopLifter.FRAME_H + height < y || x < -width) {
+				state = ST_DEATH;
+			}
+			if (y >= ((ChopLifter.FRAME_H / 5 * 4) + (ChopLifter.FRAME_H / 5 / 2))) {
+				blast();
+			}
+		} else if (state == ST_BLAST) {
+			System.out.println(blast_count);
+			blast_count--;
+			if (blast_count == 0) {
 				state = ST_DEATH;
 			}
 		}
@@ -62,7 +69,10 @@ public class TurretBomb extends GameObj {
 
 	// ÆøÅº ±×¸®±â
 	void draw(Graphics g) {
-		if (state == ST_ALIVE)
+		if (state == ST_ALIVE) {
 			drawImage(g);
+		} else if (state == ST_BLAST) {
+			drawSmallBlast(g);
+		}
 	}
 }

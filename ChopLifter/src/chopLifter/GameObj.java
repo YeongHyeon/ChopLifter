@@ -5,6 +5,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
 
 import javax.swing.JPanel;
 
@@ -30,7 +31,10 @@ abstract public class GameObj extends JPanel {
 
 	int directionX; // 방향을 나타낼 변수.
 	int directionY; // 방향을 나타낼 변수.
-	Graphics2D g2d;
+	
+	static Graphics2D g2d ;
+	static AffineTransform beforeLotate = new AffineTransform();
+
 
 	int getState() {
 		return state;
@@ -73,9 +77,22 @@ abstract public class GameObj extends JPanel {
 			g.fillOval((int) (x - x0 - r0 / 2), (int) (y - y0 - r0 / 2), (int) r0, (int) r0);
 		}
 	}
+	
+	void drawSmallBlast(Graphics g) {
+		// blast_count 개수 만큼 연기 그리기
+		for (int i = 1; i < blast_count; i++) {
+			g.setColor(new Color(Util.randColorElement(128, 255), Util.randColorElement(0, 127),
+					Util.randColorElement(0, 127)));
+			double x0 = Util.rand(-15, 15);
+			double y0 = Util.rand(-15, 15);
+			double r0 = Util.rand(5, 15);
+			g.fillOval((int) (x - x0 - r0 / 2), (int) (y - y0 - r0 / 2), (int) r0, (int) r0);
+		}
+	}
 
 	void drawTiltImage(Graphics g) {
 		g2d = (Graphics2D) g;
+		beforeLotate = g2d.getTransform();
 		g2d.rotate(Math.toRadians(degree), x, y);
 		g2d.drawImage(image, (int) (x - width / 2), (int) (y - height / 2), width, height, this);
 	}

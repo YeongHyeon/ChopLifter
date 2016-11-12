@@ -33,8 +33,8 @@ public class Missile extends GameObj {
 			init();
 		}
 	}
-	
-	void init(){
+
+	void init() {
 		if (Math.abs(degree) < 5) {
 			image = img[0];
 			if (hDir > 0) { // 방향에 따라 이미지의 좌우를 대칭시킨다.
@@ -55,13 +55,14 @@ public class Missile extends GameObj {
 	}
 
 	void setInertia() {
-		inertia_counter = 100;
+		inertia_counter = 60;
 	}
 
 	void blast() {
-		state = ST_DEATH;
-		x = ChopLifter.FRAME_W;
-		y = ChopLifter.FRAME_H;
+		state = ST_BLAST;
+		blast_count = 10;
+		x=-10;
+		y = -10;
 	}
 
 	void move() { // Target을 잃었을 경우 실행
@@ -79,10 +80,10 @@ public class Missile extends GameObj {
 				} else { // 관성이 있을때 진행방향으로 떨어짐
 					inertia_counter++;
 					if (hDir > 0) {
-						dx -= 0.5;
+						dx = -1;
 						width = tmpW;
 					} else {
-						dx += 0.5;
+						dx = 1;
 						width = -tmpW;
 					}
 				}
@@ -91,10 +92,20 @@ public class Missile extends GameObj {
 			x += dx;
 			y += dy;
 			inertia_counter--;
-		}
-		if (x < -tmpW || x > ChopLifter.FRAME_W + tmpW || y < -height || y > ChopLifter.FRAME_H + height) {
-			state = ST_DEATH;
-			inertia_counter = 0;
+			
+			if (x < -tmpW || x > ChopLifter.FRAME_W + tmpW || y < -height) {
+				state = ST_DEATH;
+				inertia_counter = 0;
+			}
+			if (y >= ((ChopLifter.FRAME_H / 5 * 4) + (ChopLifter.FRAME_H / 5 / 2))) {
+				inertia_counter = 0;
+				blast();
+			}
+		} else if (state == ST_BLAST) {
+			blast_count--;
+			if (blast_count == 0) {
+				state = ST_DEATH;
+			}
 		}
 	}
 
@@ -102,6 +113,8 @@ public class Missile extends GameObj {
 	void draw(Graphics g) {
 		if (state == ST_ALIVE) {
 			drawImage(g);
+		} else if (state == ST_BLAST) {
+			drawSmallBlast(g);
 		}
 	}
 }

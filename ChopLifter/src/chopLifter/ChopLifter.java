@@ -2,6 +2,8 @@ package chopLifter;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
+
 import javax.swing.*;
 import java.io.*;
 import javax.imageio.ImageIO;
@@ -14,7 +16,7 @@ class ChopLifterComponent extends JComponent {
 	public static int ST_ENDING = 2;
 
 	public static int TIME_SLICE = 50;
-	public static int MAX_CLOUD = 15;
+	public static int MAX_CLOUD = 3;
 	public static int MAX_MOUNTAIN = 30;
 	public static int MAX_MISSILE = 3;
 	public static int MAX_ENEMY_PLANE = 3;
@@ -35,13 +37,14 @@ class ChopLifterComponent extends JComponent {
 	private Person[] person = new Person[MAX_PERSON];
 	private HelicopterBase helibase;
 
-	Image imgCloud, imgMountain, imgPlaneBomb, imgTurretBomb, imgHeliBase;
+	Image imgCloud, imgMountain, imgPlaneBomb, imgTurretBomb, imgHeliBase, imgTitle;
 	Image[] imgHelicopter = new Image[2];
 	Image[] imgEnemyPlane = new Image[2];
 	Image[] imgMissile = new Image[2];
-	Image[] imgTurret = new Image[2];
+	Image[] imgTurret = new Image[3];
 	Image[] imgPerson = new Image[3];
-	Image imgTitle;
+	Image[] imgHeart = new Image[5];
+	Image[] imgPHeart = new Image[2];
 
 	private int state; // 게임 상태
 	private int score; // 점수
@@ -56,21 +59,39 @@ class ChopLifterComponent extends JComponent {
 		try {
 			imgCloud = ImageIO.read(new File("images/cloud.png"));
 			imgMountain = ImageIO.read(new File("images/mountain.png"));
+
 			imgHelicopter[0] = ImageIO.read(new File("images/helicopter1.png"));
 			imgHelicopter[1] = ImageIO.read(new File("images/helicopter2.png"));
+
 			imgEnemyPlane[0] = ImageIO.read(new File("images/enemyPlane1.png"));
 			imgEnemyPlane[1] = ImageIO.read(new File("images/enemyPlane2.png"));
+
 			imgMissile[0] = ImageIO.read(new File("images/missile1.png"));
 			imgMissile[1] = ImageIO.read(new File("images/missile2.png"));
+
 			imgPlaneBomb = ImageIO.read(new File("images/bomb.png"));
+			imgTurretBomb = ImageIO.read(new File("images/TurretBomb.png"));
+
 			imgTurret[0] = ImageIO.read(new File("images/TurretRight.png"));
 			imgTurret[1] = ImageIO.read(new File("images/TurretLeft.png"));
-			imgTurretBomb = ImageIO.read(new File("images/TurretBomb.png"));
+			imgTurret[2] = ImageIO.read(new File("images/TurretBroken.png"));
+
 			imgPerson[0] = ImageIO.read(new File("images/person1.png"));
 			imgPerson[1] = ImageIO.read(new File("images/person2.png"));
 			imgPerson[2] = ImageIO.read(new File("images/person3.png"));
+
 			imgHeliBase = ImageIO.read(new File("images/helibase.png"));
 			imgTitle = ImageIO.read(new File("images/title.png"));
+
+			imgHeart[0] = ImageIO.read(new File("images/heart1.png"));
+			imgHeart[1] = ImageIO.read(new File("images/heart2.png"));
+			imgHeart[2] = ImageIO.read(new File("images/heart3.png"));
+			imgHeart[3] = ImageIO.read(new File("images/heart4.png"));
+			imgHeart[4] = ImageIO.read(new File("images/heart5.png"));
+
+			imgPHeart[0] = ImageIO.read(new File("images/personheart.png"));
+			imgPHeart[1] = ImageIO.read(new File("images/personheart_full.png"));
+
 			System.out.println("ImageRead");
 		} catch (IOException e) {
 			System.out.println("IOException Exit Program");
@@ -98,7 +119,7 @@ class ChopLifterComponent extends JComponent {
 	void init() {
 		// 헬리콥터 생성
 		heli = new Helicopter(imgHelicopter, 130, 50);
-		helibase = new HelicopterBase(imgHeliBase, 300, ChopLifter.FRAME_H / 5);
+		helibase = new HelicopterBase(imgHeliBase, 180, 94);
 		// 미사일 생성
 		for (int i = 0; i < MAX_MISSILE; i++) {
 			missile[i] = new Missile(imgMissile, 30, 15);
@@ -126,7 +147,7 @@ class ChopLifterComponent extends JComponent {
 		// 포탑 생성
 		double tx = 200;
 		for (int i = 0; i < MAX_TURRET; i++) {
-			turr[i] = new Turret(imgTurret, tx, 60, 100);
+			turr[i] = new Turret(imgTurret, tx, 50, 100);
 			tx -= Util.rand(ChopLifter.FRAME_W / 3, ChopLifter.FRAME_W / 3 * 2);
 		}
 		// 적 포탑 폭탄 생성
@@ -136,7 +157,7 @@ class ChopLifterComponent extends JComponent {
 
 		// 사람 생성
 		for (int i = 0; i < MAX_PERSON; i++) {
-			person[i] = new Person(imgPerson, 30, 40);
+			person[i] = new Person(imgPerson, 25, 30);
 		}
 	}
 
@@ -186,11 +207,7 @@ class ChopLifterComponent extends JComponent {
 				if (ep.getState() == EnemyPlane.ST_ALIVE && heli.getState() == Helicopter.ST_ALIVE) {
 					if (heli.getBBox().intersects(ep.getBBox())) {
 						heli.blast();
-						ep.fall();
-						life--; // 라이프 감소
-						if (life == 0) {
-							state = ST_ENDING; // 게임 종료
-						}
+						lifeManager();
 						break;
 					}
 				}
@@ -218,10 +235,7 @@ class ChopLifterComponent extends JComponent {
 						if (heli.getBBox().intersects(b.getBBox())) {
 							heli.blast();
 							b.blast();
-							life--; // 라이프 감소
-							if (life == 0) {
-								state = ST_ENDING; // 게임 종료
-							}
+							lifeManager();
 							break;
 						}
 					}
@@ -245,11 +259,19 @@ class ChopLifterComponent extends JComponent {
 				}
 				if (turr[i].getState() == Turret.ST_ALIVE) {
 					for (Missile m : missile) {
-						if (turr[i].getBBox().intersects(m.getBBox())) {
-							turr[i].blast();
-							m.blast();
-							score += 10; // 점수 증가
-							break; // 하나 터지면 탈출
+						if (m.getState() == Missile.ST_ALIVE) {
+							if (turr[i].getBBox().intersects(m.getBBox())) {
+								turr[i].blast();
+								m.blast();
+								score += 10; // 점수 증가
+								break; // 하나 터지면 탈출
+							}
+						}
+					}
+				} else if (turr[i].getState() == Turret.ST_DEATH) { // 화면밖으로 나간 죽은 포탑을 일정확률로 살려냄
+					if (turr[i].getX() < -turr[i].width || turr[i].getX() > ChopLifter.FRAME_W + turr[i].width) {
+						if (Util.prob100(10)) {
+							turr[i].birth();
 						}
 					}
 				}
@@ -263,10 +285,7 @@ class ChopLifterComponent extends JComponent {
 						if (heli.getBBox().intersects(tb.getBBox())) {
 							heli.blast();
 							tb.blast();
-							life--; // 라이프 감소
-							if (life == 0) {
-								state = ST_ENDING; // 게임 종료
-							}
+							lifeManager();
 							break;
 						}
 					}
@@ -283,7 +302,7 @@ class ChopLifterComponent extends JComponent {
 						}
 					}
 				}
-				if (heli.isLanded() && boarder < 100 && heli.getX() >= p.initX - 100 && heli.getX() <= p.initX + 100) {
+				if (heli.isLanded() && boarder < 20 && heli.getX() >= p.initX - 100 && heli.getX() <= p.initX + 100) {
 					if (p.boarding(heli.getX(), heli.getY())) {
 						boarder++;
 						score += 10;
@@ -307,6 +326,19 @@ class ChopLifterComponent extends JComponent {
 			shiftBackGround();
 
 			repaint();
+		}
+	}
+
+	void lifeManager() {
+		life--; // 라이프 감소
+		if (life == 0) {
+			state = ST_ENDING; // 게임 종료
+		}
+		// 탑승자 감소
+		if (boarder - 3 < 0) {
+			boarder = 0;
+		} else {
+			boarder -= 3;
 		}
 	}
 
@@ -401,7 +433,7 @@ class ChopLifterComponent extends JComponent {
 				if (code == KeyEvent.VK_SPACE) { // 게임 시작
 					state = ST_GAME;
 					score = 0;
-					life = 3;
+					life = 5;
 					heli.startHelicopter(); // 게임 시작
 					for (EnemyPlane ep : enemyPlane) {
 						ep.death();
@@ -431,17 +463,21 @@ class ChopLifterComponent extends JComponent {
 						// System.out.println("RIGHT");
 					}
 				} else if (e.getKeyChar() == 'z') {
-					for (Missile m : missile) {
-						if (m.getState() == Missile.ST_DEATH) {
-							m.shot(heli.getX(), heli.getY(), heli.width, 0, heli.getDegree());
-							break;
+					if (!heli.isLanded()) {
+						for (Missile m : missile) {
+							if (m.getState() == Missile.ST_DEATH) {
+								m.shot(heli.getX(), heli.getY(), heli.width, 0, heli.getDegree());
+								break;
+							}
 						}
 					}
 				} else if (e.getKeyChar() == 'x' && !heli.isLanded()) {
-					for (Missile m : missile) {
-						if (m.getState() == Missile.ST_DEATH) {
-							m.shot(heli.getX(), heli.getY(), heli.width, 1, heli.getDegree());
-							break;
+					if (!heli.isLanded()) {
+						for (Missile m : missile) {
+							if (m.getState() == Missile.ST_DEATH) {
+								m.shot(heli.getX(), heli.getY(), heli.width, 1, heli.getDegree());
+								break;
+							}
 						}
 					}
 				}
@@ -456,6 +492,8 @@ class ChopLifterComponent extends JComponent {
 	}
 
 	public void paintComponent(Graphics g) {
+		Graphics2D g2d = (Graphics2D) g;
+
 		// 하늘
 		g.setColor(new Color(0, 188, 255));
 		g.fillRect(0, 0, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
@@ -482,13 +520,17 @@ class ChopLifterComponent extends JComponent {
 		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4 + 30, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
 		g.setColor(new Color(255, 188, 81));
 		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4 + 60, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
-
 		for (EnemyPlane ep : enemyPlane) {
 			ep.draw(g);
 		}
 
 		for (Turret t : turr) {
 			t.draw(g);
+		}
+
+		helibase.draw(g);
+		for (Missile m : missile) {
+			m.draw(g);
 		}
 
 		for (Bomb b : bomb) {
@@ -503,44 +545,56 @@ class ChopLifterComponent extends JComponent {
 			p.draw(g);
 		}
 
-		helibase.draw(g);
-		for (Missile m : missile) {
-			m.draw(g);
-		}
-
 		heli.draw(g);
+
 		// 상태별 문자 출력
 		if (state == ST_TITLE) {
+			g2d.setTransform(GameObj.beforeLotate);
+
 			int zoom = Math.abs(ani_count - 10); // 10 .. 0 .. 9 반복
 			g.drawImage(imgTitle, (ChopLifter.FRAME_W - 549) / 2 - zoom, (ChopLifter.FRAME_H - 175) / 2 - zoom,
 					549 + zoom * 2, 175 + zoom * 2, null);
 			if (ani_count < 10) { // 10 x 50msec = 500msec 주기
 				Font font = new Font(Font.SANS_SERIF, Font.BOLD, 36);
 				g.setFont(font);
+
 				FontMetrics metrics = g.getFontMetrics(font);
-				int width = metrics.stringWidth("PRESS SPACE KEY");
+				int s_center = metrics.stringWidth("PRESS SPACE KEY");
 				g.setColor(Color.WHITE);
-				g.drawString("PRESS SPACE KEY", (ChopLifter.FRAME_W - width) / 2, 430);
+				g.drawString("PRESS 'SPACE' KEY", (ChopLifter.FRAME_W - s_center) / 2, 430);
 			}
 		} else if (state == ST_GAME) {
+			g2d.setTransform(GameObj.beforeLotate);
+
 			Font font = new Font(Font.SANS_SERIF, Font.BOLD, 20);
 			g.setFont(font);
+			FontMetrics metrics = g.getFontMetrics(font);
+			int sc_width = metrics.stringWidth("SCORE: " + score);
 			g.setColor(Color.BLACK);
-			Graphics2D g2d;
-			g2d = (Graphics2D) g;
-			g2d.rotate(Math.toRadians(-(heli.degree)), 115 + (heli.degree), 100 + (heli.degree));
-			g.drawString("SCORE: " + score, 200, 300);
-			g.drawString("LIFE: " + life, 200, 330);
+			g.drawString("SCORE: " + score, 20, 40);
+			// g.drawImage(imgPHeart, sc_width + 70, 15, 50, 50, null);
+			// g.drawString("" + boarder, sc_width + 135, 40);
+			if (boarder < 20) {
+				g.drawImage(imgPHeart[0], ChopLifter.FRAME_W / 2 - 50, 10, 50, 50, null);
+			} else {
+				g.drawImage(imgPHeart[1], ChopLifter.FRAME_W / 2 - 50, 10, 50, 50, null);
+			}
+			g.drawString("" + boarder, ChopLifter.FRAME_W / 2, 40);
+			g.drawImage(imgHeart[life - 1], ChopLifter.FRAME_W - 120, -15, 100, 100, null);
 		} else if (state == ST_ENDING) {
+			g2d.setTransform(GameObj.beforeLotate);
+
 			Font font = new Font(Font.SANS_SERIF, Font.BOLD, 36);
 			g.setFont(font);
+
 			FontMetrics metrics = g.getFontMetrics(font);
-			int width1 = metrics.stringWidth("YOUR SCORE IS  " + score);
+			int s_center = metrics.stringWidth("YOUR SCORE IS  " + score);
 			g.setColor(Color.WHITE);
-			g.drawString("YOUR SCORE IS  " + score, (ChopLifter.FRAME_W - width1) / 2, 200);
+			g.drawString("YOUR SCORE IS  " + score, (ChopLifter.FRAME_W - s_center) / 2, 200);
+
 			if (ani_count < 10) {// 10 x 50msec = 500msec 주기
-				int width2 = metrics.stringWidth("PRESS ENTER KEY");
-				g.drawString("PRESS ENTER KEY", (ChopLifter.FRAME_W - width2) / 2, 400);
+				int k_center = metrics.stringWidth("PRESS ENTER KEY");
+				g.drawString("PRESS 'ENTER' KEY", (ChopLifter.FRAME_W - k_center) / 2, 400);
 			}
 		}
 	}

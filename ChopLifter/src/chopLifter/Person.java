@@ -22,7 +22,7 @@ public class Person extends GameObj {
 		state = ST_ALIVE;
 		initX = tx;
 		x = tx;
-		y = ty + 20;
+		y = ty + 30;
 		width = tmpW;
 		height = tmpH;
 		dx = Util.rand(1, 3);

@@ -24,12 +24,12 @@ public class Bomb extends GameObj {
 			this.y = enemyY;
 			dx = (shipX - x) / 50;
 			dy = (shipY - y) / 50;
-			if(dx < 0){
+			if (dx < 0) {
 				width = -tmpW;
 			} else {
 				width = tmpW;
 			}
-			if(dy < 0){
+			if (dy < 0) {
 				height = -tmpH;
 			} else {
 				height = tmpH;
@@ -39,16 +39,24 @@ public class Bomb extends GameObj {
 
 	// 폭발 상태 설정
 	void blast() {
-		state = ST_DEATH;
-		x = ChopLifter.FRAME_W;
-		y = ChopLifter.FRAME_H;
+		state = ST_BLAST;
+		blast_count = 10;
 	}
 
 	void move() {
 		if (state == ST_ALIVE) {
 			x += dx;
 			y += dy;
-			if (y < -40 || ChopLifter.FRAME_H + 40 < y || x < -40 || ChopLifter.FRAME_W + 40 < x) { // 화면밖으로나가면 죽음
+			if (y < -height || ChopLifter.FRAME_H + height < y || x < -width) {
+				state = ST_DEATH;
+			}
+			if (y >= ((ChopLifter.FRAME_H / 5 * 4) + (ChopLifter.FRAME_H / 5 / 2))) {
+				blast();
+			}
+		} else if (state == ST_BLAST) {
+			System.out.println(blast_count);
+			blast_count--;
+			if (blast_count == 0) {
 				state = ST_DEATH;
 			}
 		}
@@ -58,6 +66,8 @@ public class Bomb extends GameObj {
 	void draw(Graphics g) {
 		if (state == ST_ALIVE) {
 			drawImage(g);
+		} else if (state == ST_BLAST) {
+			drawSmallBlast(g);
 		}
 	}
 }
