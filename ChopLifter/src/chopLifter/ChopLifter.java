@@ -98,7 +98,7 @@ class ChopLifterComponent extends JComponent {
 	void init() {
 		// 헬리콥터 생성
 		heli = new Helicopter(imgHelicopter, 130, 50);
-		helibase = new HelicopterBase(imgHeliBase, 300, 150);
+		helibase = new HelicopterBase(imgHeliBase, 300, ChopLifter.FRAME_H / 5);
 		// 미사일 생성
 		for (int i = 0; i < MAX_MISSILE; i++) {
 			missile[i] = new Missile(imgMissile, 30, 15);

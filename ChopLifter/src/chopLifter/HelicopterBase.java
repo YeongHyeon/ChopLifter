@@ -8,7 +8,7 @@ public class HelicopterBase extends GameObj {
 	HelicopterBase(Image img, int w, int h) {
 		image = img;
 		state = ST_ALIVE;
-		x = ChopLifter.FRAME_W - (w / 3);
+		x = ChopLifter.FRAME_W - (w / 2);
 		y = ChopLifter.FRAME_H / 5 * 4 + (h / 2);
 		width = w;
 		height = h;
@@ -18,10 +18,6 @@ public class HelicopterBase extends GameObj {
 	void blast() {
 		state = ST_BLAST;
 		blast_count = 15;
-		y += 3;
-		int tmp = width;
-		width = height;
-		height = tmp;
 	}
 
 	void move() {
