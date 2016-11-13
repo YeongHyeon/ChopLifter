@@ -1,0 +1,29 @@
+package chopLifter;
+
+import java.awt.Graphics;
+import java.awt.Image;
+
+public class Desert extends GameObj {
+
+	Desert(Image img, int x) {
+		image = img;
+		this.x = x;
+		this.y = ChopLifter.FRAME_H / 5 * 4;
+		width = ChopLifter.FRAME_W;
+		height = ChopLifter.FRAME_H / 5 * 4;
+		dx = 0.5;
+	}
+	
+	@Override
+	void blast() {
+		
+	}
+
+	void move() {
+		
+	}
+
+	void draw(Graphics g) {
+		drawImage(g);
+	}
+}

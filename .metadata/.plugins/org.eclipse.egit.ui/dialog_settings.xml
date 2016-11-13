@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<section name="Workbench">
+	<item value="true" key="CommitDialog.showUntracked"/>
+	<list key="CommitDialog.authorValues">
+		<item value="YoungHyeon &lt;YoungHyeon@YeongHyeon&gt;"/>
+		<item value="YeongHyeon &lt;young200405@gmail.com&gt;"/>
+	</list>
+	<list key="CommitDialog.committerValues">
+		<item value="YoungHyeon &lt;YoungHyeon@YeongHyeon&gt;"/>
+		<item value="YeongHyeon &lt;young200405@gmail.com&gt;"/>
+	</list>
+	<section name="org.eclipse.egit.ui.internal.push.PushResultDialog.dialogBounds">
+		<item value="666" key="DIALOG_WIDTH"/>
+		<item value="1|맑은 고딕|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|맑은 고딕" key="DIALOG_FONT_NAME"/>
+		<item value="458" key="DIALOG_HEIGHT"/>
+		<item value="530" key="DIALOG_X_ORIGIN"/>
+		<item value="264" key="DIALOG_Y_ORIGIN"/>
+		<list key="sashWeights">
+			<item value="600"/>
+			<item value="400"/>
+		</list>
+	</section>
+	<section name="org.eclipse.egit.ui.COMMIT_DIALOG_SECTION">
+		<item value="642" key="DIALOG_WIDTH"/>
+		<item value="1|맑은 고딕|9.0|0|WINDOWS|1|-12|0|0|0|400|0|0|0|1|0|0|0|0|맑은 고딕" key="DIALOG_FONT_NAME"/>
+		<item value="641" key="DIALOG_HEIGHT"/>
+		<item value="527" key="DIALOG_X_ORIGIN"/>
+		<item value="86" key="DIALOG_Y_ORIGIN"/>
+	</section>
+	<section name="GitCommitMessageComponent">
+		<list key="E:\3-2\System Programming\ChopLifter.ver.1.2\.git">
+			<item value="false"/>
+			<item value="YoungHyeon &lt;YoungHyeon@YeongHyeon&gt;"/>
+			<item value="20161113 Enemy Tilt Apply"/>
+			<item value="YoungHyeon &lt;YoungHyeon@YeongHyeon&gt;"/>
+			<item value="3833de2a4f898300d9eb3da7b6897f4e09dc609d"/>
+		</list>
+	</section>
+	<section name="org.eclipse.egit.ui.internal.staging.StagingView">
+		<item value="723,276" key="STAGING_SASH_FORM_WEIGHT"/>
+		<item value="false" key="sortItemState"/>
+		<item value="500,500" key="HORIZONTAL_SASH_FORM_WEIGHT"/>
+	</section>
+</section>

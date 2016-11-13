@@ -4,4 +4,5 @@
 <fullyQualifiedTypeName name="java.awt.image.ImageObserver"/>
 <fullyQualifiedTypeName name="chopLifter.GameObj"/>
 <fullyQualifiedTypeName name="java.lang.System"/>
+<fullyQualifiedTypeName name="java.awt.geom.AffineTransform"/>
 </qualifiedTypeNameHistroy>

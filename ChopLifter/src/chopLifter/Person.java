@@ -4,7 +4,7 @@ import java.awt.Graphics;
 import java.awt.Image;
 
 public class Person extends GameObj {
-	private Image[] imgP = new Image[3];
+	private Image[] imgP = new Image[2];
 	private int p_counter, pointer;
 	private int life_cycle;
 	double initX;
@@ -36,10 +36,6 @@ public class Person extends GameObj {
 	void blast() {
 		state = ST_BLAST;
 		blast_count = 15;
-		y += 3;
-		int tmp = width;
-		width = height;
-		height = tmp;
 	}
 
 	void shakeBody() {
@@ -70,8 +66,9 @@ public class Person extends GameObj {
 		}
 		// BLAST 상태에서는 count 시간 후 DEATH로 설정
 		else if (state == ST_BLAST) {
-			image = imgP[2];
+			image = imgP[1];
 			blast_count--;
+			degree-=6;
 			if (blast_count == 0) {
 				state = ST_DEATH;
 			}
@@ -109,7 +106,8 @@ public class Person extends GameObj {
 		if (state == ST_ALIVE) {
 			drawImage(g);
 		} else if (state == ST_BLAST) {
-			drawImage(g);
+//			drawImage(g);
+			drawTiltImage(g);
 		}
 	}
 }

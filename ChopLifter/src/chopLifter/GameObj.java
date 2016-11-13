@@ -31,10 +31,6 @@ abstract public class GameObj extends JPanel {
 
 	int directionX; // 방향을 나타낼 변수.
 	int directionY; // 방향을 나타낼 변수.
-	
-	static Graphics2D g2d ;
-	static AffineTransform beforeLotate = new AffineTransform();
-
 
 	int getState() {
 		return state;
@@ -91,10 +87,11 @@ abstract public class GameObj extends JPanel {
 	}
 
 	void drawTiltImage(Graphics g) {
-		g2d = (Graphics2D) g;
-		beforeLotate = g2d.getTransform();
+		Graphics2D g2d  = (Graphics2D) g;
+		AffineTransform beforeLotate = g2d.getTransform();
 		g2d.rotate(Math.toRadians(degree), x, y);
 		g2d.drawImage(image, (int) (x - width / 2), (int) (y - height / 2), width, height, this);
+		g2d.setTransform(beforeLotate);
 	}
 
 	// 바운딩박스 생성

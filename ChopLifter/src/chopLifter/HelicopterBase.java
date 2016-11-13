@@ -37,7 +37,7 @@ public class HelicopterBase extends GameObj {
 
 	void draw(Graphics g) {
 		if (state == ST_ALIVE) {
-			drawImage(g);
+			drawTiltImage(g);
 		} else if (state == ST_BLAST) {
 			drawImage(g);
 		}

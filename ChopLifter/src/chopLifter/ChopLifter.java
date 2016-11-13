@@ -1,7 +1,14 @@
+/* ======================================================= 
+ * ChopLifter Game Customizing ver
+ * Origin: Choplifter 1985 Sega Mame Retro Arcade Games
+ * Developed By YeongHyeon
+ * young200405@gmail.com
+ * ======================================================= */
 package chopLifter;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
 
 import javax.swing.*;
 import java.io.*;
@@ -41,7 +48,7 @@ class ChopLifterComponent extends JComponent {
 	Image[] imgEnemyPlane = new Image[2];
 	Image[] imgMissile = new Image[2];
 	Image[] imgTurret = new Image[3];
-	Image[] imgPerson = new Image[3];
+	Image[] imgPerson = new Image[2];
 	Image[] imgHeart = new Image[5];
 	Image[] imgPHeart = new Image[2];
 
@@ -77,7 +84,6 @@ class ChopLifterComponent extends JComponent {
 
 			imgPerson[0] = ImageIO.read(new File("images/person1.png"));
 			imgPerson[1] = ImageIO.read(new File("images/person2.png"));
-			imgPerson[2] = ImageIO.read(new File("images/person3.png"));
 
 			imgHeliBase = ImageIO.read(new File("images/helibase.png"));
 			imgTitle = ImageIO.read(new File("images/title.png"));
@@ -499,10 +505,8 @@ class ChopLifterComponent extends JComponent {
 		}
 
 	}
-
+	
 	public void paintComponent(Graphics g) {
-		Graphics2D g2d = (Graphics2D) g;
-
 		// 하늘
 		g.setColor(new Color(0, 188, 255));
 		g.fillRect(0, 0, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
@@ -529,10 +533,10 @@ class ChopLifterComponent extends JComponent {
 		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4 + 30, Math.abs(ChopLifter.Left_End_X-ChopLifter.Right_End_X), ChopLifter.FRAME_H);
 		g.setColor(new Color(255, 188, 81));
 		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4 + 60, Math.abs(ChopLifter.Left_End_X-ChopLifter.Right_End_X), ChopLifter.FRAME_H);
+		
 		for (EnemyPlane ep : enemyPlane) {
 			ep.draw(g);
 		}
-
 		for (Turret t : turr) {
 			t.draw(g);
 		}
@@ -555,11 +559,9 @@ class ChopLifterComponent extends JComponent {
 		}
 
 		heli.draw(g);
-
+		
 		// 상태별 문자 출력
 		if (state == ST_TITLE) {
-			g2d.setTransform(GameObj.beforeLotate);
-
 			int zoom = Math.abs(ani_count - 10); // 10 .. 0 .. 9 반복
 			g.drawImage(imgTitle, (ChopLifter.FRAME_W - 549) / 2 - zoom, (ChopLifter.FRAME_H - 175) / 2 - zoom,
 					549 + zoom * 2, 175 + zoom * 2, null);
@@ -573,14 +575,10 @@ class ChopLifterComponent extends JComponent {
 				g.drawString("PRESS 'SPACE' KEY", (ChopLifter.FRAME_W - s_center) / 2, 430);
 			}
 		} else if (state == ST_GAME) {
-			g2d.setTransform(GameObj.beforeLotate);
-
 			Font font = new Font(Font.SANS_SERIF, Font.BOLD, 20);
 			g.setFont(font);
 			g.setColor(Color.BLACK);
 			g.drawString("SCORE: " + score, 20, 40);
-			// g.drawImage(imgPHeart, sc_width + 70, 15, 50, 50, null);
-			// g.drawString("" + boarder, sc_width + 135, 40);
 			if (boarder < 20) {
 				g.drawImage(imgPHeart[0], ChopLifter.FRAME_W / 2 - 50, 10, 50, 50, null);
 			} else {
@@ -589,7 +587,6 @@ class ChopLifterComponent extends JComponent {
 			g.drawString("" + boarder, ChopLifter.FRAME_W / 2, 40);
 			g.drawImage(imgHeart[life - 1], ChopLifter.FRAME_W - 120, -15, 100, 100, null);
 		} else if (state == ST_ENDING) {
-			g2d.setTransform(GameObj.beforeLotate);
 
 			Font font = new Font(Font.SANS_SERIF, Font.BOLD, 36);
 			g.setFont(font);
@@ -604,6 +601,10 @@ class ChopLifterComponent extends JComponent {
 				g.drawString("PRESS 'ENTER' KEY", (ChopLifter.FRAME_W - k_center) / 2, 400);
 			}
 		}
+		Font font = new Font(Font.SANS_SERIF, Font.BOLD, 10);
+		g.setFont(font);
+		g.setColor(Color.GRAY);
+		g.drawString("Developed by YH", ChopLifter.FRAME_W-90, ChopLifter.FRAME_H-10);
 	}
 
 }
