@@ -5,9 +5,8 @@ import java.awt.Image;
 
 public class EnemyPlane extends GameObj {
 	private Image[] img = new Image[2];
-	private int uTurn;
-	private int spin;
-	private int turnPoint = 140;
+	private double speed;
+	private int uTurn, spin, turnPoint = 140;
 	private boolean noTurn = false;
 
 	EnemyPlane(Image[] imgEnemyPlane, int w, int h) {
@@ -22,6 +21,7 @@ public class EnemyPlane extends GameObj {
 		state = ST_ALIVE;
 		x = -tmpW;
 		y = Util.rand(70, ChopLifter.FRAME_H / 5 * 3);
+		speed = Util.rand(0.5, 2);
 		dx = 0;
 		dy = 0;
 		uTurn = 0;
@@ -61,13 +61,13 @@ public class EnemyPlane extends GameObj {
 				if (noTurn == false)
 					width = tmpW;
 				if (dx < 10) {
-					dx += 0.5;
+					dx += speed;
 				}
 			} else if (uTurn == 1) {
 				if (noTurn == false)
 					width = -tmpW;
 				if (dx > -10) {
-					dx -= 0.5;
+					dx -= speed;
 				}
 			} else if (uTurn == 2) {
 				if (noTurn == false)

@@ -2,7 +2,6 @@ package chopLifter;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.geom.AffineTransform;
 
 import javax.swing.*;
 import java.io.*;
@@ -50,7 +49,7 @@ class ChopLifterComponent extends JComponent {
 	private int score; // 점수
 	private int life; // 라이프
 	private int ani_count; // 애니메이션 카운터 0~19 반복
-
+	private int shot_limiter;
 	private int boarder;
 
 	ChopLifterComponent() {
@@ -100,6 +99,7 @@ class ChopLifterComponent extends JComponent {
 		// 게임 상태 초기화
 		state = ST_TITLE;
 		ani_count = 0;
+		shot_limiter = 0;
 
 		init();
 
@@ -168,6 +168,10 @@ class ChopLifterComponent extends JComponent {
 			heli.move();
 			// ENDING 화면 우주선 폭발 처리
 			ani_count = (ani_count + 1) % 20; // 0 .. 19 반복
+			if (shot_limiter > 0) {
+				shot_limiter--;
+			}
+
 			if (state == ST_ENDING) {
 				if (ani_count == 0) {
 					heli.blast();
@@ -207,6 +211,7 @@ class ChopLifterComponent extends JComponent {
 				if (ep.getState() == EnemyPlane.ST_ALIVE && heli.getState() == Helicopter.ST_ALIVE) {
 					if (heli.getBBox().intersects(ep.getBBox())) {
 						heli.blast();
+						ep.fall();
 						lifeManager();
 						break;
 					}
@@ -268,7 +273,9 @@ class ChopLifterComponent extends JComponent {
 							}
 						}
 					}
-				} else if (turr[i].getState() == Turret.ST_DEATH) { // 화면밖으로 나간 죽은 포탑을 일정확률로 살려냄
+				} else if (turr[i].getState() == Turret.ST_DEATH) { // 화면밖으로 나간
+																	// 죽은 포탑을
+																	// 일정확률로 살려냄
 					if (turr[i].getX() < -turr[i].width || turr[i].getX() > ChopLifter.FRAME_W + turr[i].width) {
 						if (Util.prob100(10)) {
 							turr[i].birth();
@@ -465,8 +472,9 @@ class ChopLifterComponent extends JComponent {
 				} else if (e.getKeyChar() == 'z') {
 					if (!heli.isLanded()) {
 						for (Missile m : missile) {
-							if (m.getState() == Missile.ST_DEATH) {
+							if (m.getState() == Missile.ST_DEATH && shot_limiter == 0) {
 								m.shot(heli.getX(), heli.getY(), heli.width, 0, heli.getDegree());
+								shot_limiter = 10;
 								break;
 							}
 						}
@@ -474,8 +482,9 @@ class ChopLifterComponent extends JComponent {
 				} else if (e.getKeyChar() == 'x' && !heli.isLanded()) {
 					if (!heli.isLanded()) {
 						for (Missile m : missile) {
-							if (m.getState() == Missile.ST_DEATH) {
+							if (m.getState() == Missile.ST_DEATH && shot_limiter == 0) {
 								m.shot(heli.getX(), heli.getY(), heli.width, 1, heli.getDegree());
+								shot_limiter = 10;
 								break;
 							}
 						}
@@ -513,13 +522,13 @@ class ChopLifterComponent extends JComponent {
 		}
 		// 땅
 		g.setColor(new Color(255, 255, 81));
-		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
+		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4, Math.abs(ChopLifter.Left_End_X-ChopLifter.Right_End_X), ChopLifter.FRAME_H);
 		g.setColor(new Color(255, 220, 81));
-		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4 + 10, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
+		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4 + 10, Math.abs(ChopLifter.Left_End_X-ChopLifter.Right_End_X), ChopLifter.FRAME_H);
 		g.setColor(new Color(255, 200, 81));
-		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4 + 30, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
+		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4 + 30, Math.abs(ChopLifter.Left_End_X-ChopLifter.Right_End_X), ChopLifter.FRAME_H);
 		g.setColor(new Color(255, 188, 81));
-		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4 + 60, ChopLifter.FRAME_W, ChopLifter.FRAME_H);
+		g.fillRect(0, ChopLifter.FRAME_H / 5 * 4 + 60, Math.abs(ChopLifter.Left_End_X-ChopLifter.Right_End_X), ChopLifter.FRAME_H);
 		for (EnemyPlane ep : enemyPlane) {
 			ep.draw(g);
 		}
@@ -568,8 +577,6 @@ class ChopLifterComponent extends JComponent {
 
 			Font font = new Font(Font.SANS_SERIF, Font.BOLD, 20);
 			g.setFont(font);
-			FontMetrics metrics = g.getFontMetrics(font);
-			int sc_width = metrics.stringWidth("SCORE: " + score);
 			g.setColor(Color.BLACK);
 			g.drawString("SCORE: " + score, 20, 40);
 			// g.drawImage(imgPHeart, sc_width + 70, 15, 50, 50, null);
@@ -592,7 +599,7 @@ class ChopLifterComponent extends JComponent {
 			g.setColor(Color.WHITE);
 			g.drawString("YOUR SCORE IS  " + score, (ChopLifter.FRAME_W - s_center) / 2, 200);
 
-			if (ani_count < 10) {// 10 x 50msec = 500msec 주기
+			if (ani_count < 10) {
 				int k_center = metrics.stringWidth("PRESS ENTER KEY");
 				g.drawString("PRESS 'ENTER' KEY", (ChopLifter.FRAME_W - k_center) / 2, 400);
 			}

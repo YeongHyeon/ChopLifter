@@ -24,9 +24,8 @@ class Cloud {
 
 	void move() {
 		x += dx;
-		if (x > ChopLifter.FRAME_W + 100) {
+		if (x > ChopLifter.FRAME_W - 16) {
 			init(2);
-			x = -Util.rand(ChopLifter.FRAME_W / 10);
 		}
 	}
 

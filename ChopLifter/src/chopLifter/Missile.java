@@ -61,7 +61,7 @@ public class Missile extends GameObj {
 	void blast() {
 		state = ST_BLAST;
 		blast_count = 10;
-		x=-10;
+		x = -10;
 		y = -10;
 	}
 
@@ -78,7 +78,7 @@ public class Missile extends GameObj {
 				if (inertia_counter <= 0) { // 관성이 없을때
 					// NOP
 				} else { // 관성이 있을때 진행방향으로 떨어짐
-					inertia_counter++;
+					inertia_counter += 2;
 					if (hDir > 0) {
 						dx = -1;
 						width = tmpW;
@@ -92,7 +92,7 @@ public class Missile extends GameObj {
 			x += dx;
 			y += dy;
 			inertia_counter--;
-			
+
 			if (x < -tmpW || x > ChopLifter.FRAME_W + tmpW || y < -height) {
 				state = ST_DEATH;
 				inertia_counter = 0;

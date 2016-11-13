@@ -54,7 +54,6 @@ public class Bomb extends GameObj {
 				blast();
 			}
 		} else if (state == ST_BLAST) {
-			System.out.println(blast_count);
 			blast_count--;
 			if (blast_count == 0) {
 				state = ST_DEATH;
