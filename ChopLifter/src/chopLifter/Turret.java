@@ -35,6 +35,14 @@ public class Turret extends GameObj {
 		heliX = d;
 	}
 
+	boolean getPosin() {
+		if (heliX > x) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
 	void setPoro() {
 		poro_num++;
 	}

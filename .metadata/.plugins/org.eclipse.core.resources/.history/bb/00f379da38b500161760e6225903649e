@@ -1,0 +1,72 @@
+package chopLifter;
+
+import java.awt.Graphics;
+import java.awt.Image;
+
+public class TurretBomb extends GameObj {
+	private Image img;
+
+	TurretBomb(Image img, int w, int h) {
+		image = img;
+		state = ST_DEATH;
+		width = w;
+		height = h;
+	}
+
+	// x, y À§Ä¡¿¡¼­ mx, my À§Ä¡·Î ÆøÅº ¹ß»ç
+	void shot(double x, double y, double mx, double my) { // ÆøÅºÀÇ ÁÂÇ¥ : x,y
+		if (state == ST_DEATH) {
+			state = ST_ALIVE;
+			this.x = x;
+			this.y = y;
+
+			dx = (mx - x) / 50;
+			dy = (my - y) / 50;
+
+			if (dx > 5 || dy > 5) {
+				dx = dx / 1.5;
+				dy = dy / 1.5;
+			}
+
+			if (dx < -5 || dy < -5) {
+				dx = dx / 1.5;
+				dy = dy / 1.5;
+			}
+		}
+	}
+
+	void blast() {
+		state = ST_BLAST;
+		blast_count = 10;
+	}
+
+	// Å¸ÀÌ¸Ó¿¡ ÀÇÇÑ ÆøÅºÀÇ ¿òÁ÷ÀÓ Ã³¸®
+	void move() {
+		if (state == ST_ALIVE) {
+			x += dx;
+			y += dy;
+			degree = (degree + 3) % 360;
+			if (y < -height || ChopLifter.FRAME_H + height < y || x < -width) {
+				state = ST_DEATH;
+			}
+			if (y >= ((ChopLifter.FRAME_H / 5 * 4) + (ChopLifter.FRAME_H / 5 / 2))) {
+				blast();
+			}
+		} else if (state == ST_BLAST) {
+			blast_count--;
+			if (blast_count == 0) {
+				state = ST_DEATH;
+			}
+		}
+	}
+
+	// ÆøÅº ±×¸®±â
+	void draw(Graphics g) {
+		if (state == ST_ALIVE) {
+			// drawImage(g);
+			drawTiltImage(g);
+		} else if (state == ST_BLAST) {
+			drawSmallBlast(g);
+		}
+	}
+}

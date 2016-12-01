@@ -29,11 +29,7 @@
 	</section>
 	<section name="GitCommitMessageComponent">
 		<list key="E:\3-2\System Programming\ChopLifter.ver.1.2\.git">
-			<item value="false"/>
-			<item value="YoungHyeon &lt;YoungHyeon@YeongHyeon&gt;"/>
-			<item value="20161113 Enemy Tilt Apply"/>
-			<item value="YoungHyeon &lt;YoungHyeon@YeongHyeon&gt;"/>
-			<item value="3833de2a4f898300d9eb3da7b6897f4e09dc609d"/>
+			<item value="empty"/>
 		</list>
 	</section>
 	<section name="org.eclipse.egit.ui.internal.staging.StagingView">

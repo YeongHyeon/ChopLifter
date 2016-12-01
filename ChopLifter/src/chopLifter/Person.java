@@ -29,7 +29,8 @@ public class Person extends GameObj {
 		if (Util.prob100(50)) {
 			dx *= -1;
 		}
-		life_cycle = 200;
+		life_cycle = (int)Util.rand(100, 200);
+		degree = 0;
 	}
 
 	// 폭발 상태 설정
@@ -68,7 +69,9 @@ public class Person extends GameObj {
 		else if (state == ST_BLAST) {
 			image = imgP[1];
 			blast_count--;
-			degree-=6;
+			if (degree - 6 >= -90) {
+				degree -= 6;
+			}
 			if (blast_count == 0) {
 				state = ST_DEATH;
 			}
@@ -76,8 +79,9 @@ public class Person extends GameObj {
 	}
 
 	boolean boarding(double hx, double hy) {
+		shakeBody();
 		if (state == ST_ALIVE) {
-			shakeBody();
+			image = imgP[pointer % 2];
 			if (x < hx) {
 				x += 2;
 			} else if (x <= hx + 2 && x >= hx - 2) {
@@ -106,7 +110,6 @@ public class Person extends GameObj {
 		if (state == ST_ALIVE) {
 			drawImage(g);
 		} else if (state == ST_BLAST) {
-//			drawImage(g);
 			drawTiltImage(g);
 		}
 	}

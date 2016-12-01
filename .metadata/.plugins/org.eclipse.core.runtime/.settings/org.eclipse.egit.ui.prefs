@@ -1,5 +1,5 @@
 StagingView_SyncWithSelection=false
-commit_dialog_history_messages=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<messages>\r\n<message>20161113 EnemyTilt Apply</message>\r\n<message>20161113 Check</message>\r\n<message>20161112 ChopLifter Prototype</message>\r\n</messages>
+commit_dialog_history_messages=<?xml version\="1.0" encoding\="UTF-8"?>\r\n<messages>\r\n<message>20161113 Enemy Tilt Apply</message>\r\n<message>20161113 EnemyTilt Apply</message>\r\n<message>20161113 Check</message>\r\n<message>20161112 ChopLifter Prototype</message>\r\n</messages>
 eclipse.preferences.version=1
 resourcehistory_graph_split=676,323
 resourcehistory_rev_split=700,300

@@ -1,0 +1,66 @@
+package chopLifter;
+
+import java.awt.Graphics;
+import java.awt.Image;
+
+public class TurretBomb extends GameObj {
+	private Image img;
+	private boolean shotDir;
+	private double slope;
+
+	TurretBomb(Image img, int w, int h) {
+		image = img;
+		state = ST_DEATH;
+		width = w;
+		height = h;
+		slope = 0;
+
+	}
+
+	// x, y 위치에서 mx, my 위치로 폭탄 발사
+	void shot(double x, double y, double mx, double my, boolean shotDir) {
+		if (state == ST_DEATH) {
+			state = ST_ALIVE;
+			this.x = x;
+			this.y = y;
+			this.shotDir = shotDir;
+			slope = 0;
+
+			dx = 1;
+			dy = -17;
+		}
+	}
+
+	void blast() {
+		state = ST_BLAST;
+		blast_count = 10;
+	}
+
+	// 타이머에 의한 폭탄의 움직임 처리
+	void move() {
+		if (state == ST_ALIVE) {
+			if (shotDir == true) {
+				x = x + dx + slope;
+				y = y + dy + slope;
+			} else {
+				x = x - dx - slope;
+				y = y + dy + slope;
+			}
+			slope += 0.5;
+
+			if (y < -height || ChopLifter.FRAME_H + height < y || x < -width || ChopLifter.FRAME_W + width < x) {
+				state = ST_DEATH;
+			}
+		}
+	}
+
+	// 폭탄 그리기
+	void draw(Graphics g) {
+		if (state == ST_ALIVE) {
+			// drawImage(g);
+			drawTiltImage(g);
+		} else if (state == ST_BLAST) {
+			drawSmallBlast(g);
+		}
+	}
+}

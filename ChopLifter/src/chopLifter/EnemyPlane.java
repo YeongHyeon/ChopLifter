@@ -51,9 +51,9 @@ public class EnemyPlane extends GameObj {
 
 		// ALIVE 상태에서는 좌우로 이동
 		if (state == ST_ALIVE) {
-			if (x > ChopLifter.FRAME_W - 140) {
+			if (x > ChopLifter.FRAME_W - turnPoint) {
 				uTurn = 1;
-			} else if (x < 140 && uTurn != 2) {
+			} else if (x < turnPoint && uTurn != 2) {
 				uTurn = 2;
 			}
 
@@ -61,25 +61,31 @@ public class EnemyPlane extends GameObj {
 				if (noTurn == false)
 					width = tmpW;
 				if (dx < 10) {
-					dx += speed;
+					dx += 1;
+					dy += 0.05;
 				}
 			} else if (uTurn == 1) {
 				if (noTurn == false)
 					width = -tmpW;
 				if (dx > -10) {
-					dx -= speed;
+					dx -= 1;
+					dy -= 0.05;
 				}
 			} else if (uTurn == 2) {
 				if (noTurn == false)
 					width = tmpW;
 				if (dx < 10) {
-					dx += 0.5;
+					dx += 1;
+					dy += 0.05;
 				}
 			}
+
 			degree = (int) dx;
 			x += dx;
 			y += dy;
-		} else if (state == ST_BLAST) {
+		}
+		// BLAST 상태에서는 count 시간 후 DEATH로 설정
+		else if (state == ST_BLAST) {
 			blast_count--;
 			if (blast_count == 0) {
 				state = ST_DEATH;

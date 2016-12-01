@@ -25,7 +25,7 @@ public class ImagePanel extends JPanel {
 			rect[i] = new Rectangle((i%10 * 20), ((i/10) * 20), 20, 20);
 		}
 
-		time = new Timer(10, new TimerHandler());
+		time = new Timer(50, new TimerHandler());
 		time.start();
 	}
 

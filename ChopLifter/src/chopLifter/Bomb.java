@@ -6,6 +6,7 @@ import java.awt.Image;
 public class Bomb extends GameObj {
 	private double dx, dy; // 폭탄의 단위 이동 거리 대각선으로 이동할 것이기 때문에 2개 방향이 필요
 	private int tmpW, tmpH;
+	private boolean shoted;
 
 	Bomb(Image img, int w, int h) {
 		image = img;
@@ -14,6 +15,7 @@ public class Bomb extends GameObj {
 		width = tmpW;
 		tmpH = h;
 		height = tmpH;
+		shoted = false;
 	}
 
 	// x, y 위치에서 mx, my 위치로 폭탄 발사
@@ -22,8 +24,10 @@ public class Bomb extends GameObj {
 			state = ST_ALIVE;
 			this.x = enemyX;
 			this.y = enemyY;
+
 			dx = (shipX - x) / 50;
 			dy = (shipY - y) / 50;
+
 			if (dx < 0) {
 				width = -tmpW;
 			} else {
@@ -34,24 +38,43 @@ public class Bomb extends GameObj {
 			} else {
 				height = tmpH;
 			}
+
+			if (dx > 5 || dy > 5) {
+				dx = dx / 1.3;
+				dy = dy / 1.3;
+				// System.out.println("발생");
+			}
+
+			if (dx < -5 || dy < -5) {
+				dx = dx / 1.3;
+				dy = dy / 1.3;
+				// System.out.println("발생");
+			}
 		}
+		shoted = true;
 	}
 
 	// 폭발 상태 설정
 	void blast() {
 		state = ST_BLAST;
+		shoted = false;
 		blast_count = 10;
+		x = ChopLifter.FRAME_W;
+		y = ChopLifter.FRAME_H;
 	}
 
 	void move() {
 		if (state == ST_ALIVE) {
-			x += dx;
 			y += dy;
-			if (y < -height || ChopLifter.FRAME_H + height < y || x < -width) {
+			x += dx;
+
+			if (y < -tmpH || x < -tmpW || ChopLifter.FRAME_W + tmpW < x) {
 				state = ST_DEATH;
+				shoted = false;
 			}
 			if (y >= ((ChopLifter.FRAME_H / 5 * 4) + (ChopLifter.FRAME_H / 5 / 2))) {
-				blast();
+				state = ST_BLAST;
+				shoted = false;
 			}
 		} else if (state == ST_BLAST) {
 			blast_count--;
@@ -59,6 +82,10 @@ public class Bomb extends GameObj {
 				state = ST_DEATH;
 			}
 		}
+	}
+
+	boolean getShoted() {
+		return shoted;
 	}
 
 	// 그리기
