@@ -1,8 +1,9 @@
 # ChopLifter
 
-This is a classic game.
-It was created during the process of studying GUI or game programming.
-The original game is a game that is interpreted in your own way and made through some transformation process.
+This is a classic game.    
+It was created during the process of studying GUI or game programming.    
+It is a game that customized the existing game.   
+
 
 The rules of this game are as follows.  
 
