@@ -1,6 +1,9 @@
 <h1>ChopLifter</h1>
 
-<source src="game.mp4" type="video/mp4">
+<video width="320" height="240" controls>
+  <source src="game.mp4" type="video/mp4">
+Your browser does not support the video tag.
+</video>
 
 This is a classic game.    
 It was created during the process of studying GUI or game programming.    
@@ -23,12 +26,12 @@ It is a game that customized the existing game.
 
 <h3>src\</h3>
 <p>Java source code is located here.</p>
-<p><strong>ChopLifter.java<strong></br>
+<p><strong>ChopLifter.java</strong></br>
 The source for running objects throughout the game.
 </p>
-<p><strong>Bomb.java, Cloud.java, Helicopter.java ...<strong></br>
+<p><strong>Bomb.java, Cloud.java, Helicopter.java ...</strong></br>
 An object that has a movement or life cycle.
 </p>
-<p><strong>GameObj.java, Util.java<strong></br>
+<p><strong>GameObj.java, Util.java</strong></br>
 A collection of methods or useful methods to which objects inherit.
 </p>
