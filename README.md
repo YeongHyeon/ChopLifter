@@ -1,13 +1,17 @@
 <h1>ChopLifter</h1>
 
-<video width="320" height="240" autoplay>
-  <source src="game.mp4" type="video/mp4">
-</video>
+<p>
+This is a classic game.    </br>
+It was created during the process of studying GUI or game programming.    </br>
+It is a game that customized the existing game.   </br>
+</p>
 
-This is a classic game.    
-It was created during the process of studying GUI or game programming.    
-It is a game that customized the existing game.   
+<p><img src="game.gif"></p>
 
+<p>See the more video in YouTube</br>
+<a href="https://www.youtube.com/watch?v=Vchf1bhBDLw">Video 1</a></br>
+<a href="https://www.youtube.com/watch?v=Xdtit2phU9M">Video 1</a>
+</p>
 
 <p>The rules of this game are as follows.</p>
 <p>
